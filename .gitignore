@@ -1,10 +1,7 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
 .pnp.js
-.yarn/install-state.gz
 
 # testing
 /coverage
@@ -16,6 +13,11 @@
 # production
 /build
 
+# env & secrets — never commit. Only .env.example is tracked.
+.env
+.env.*
+!.env.example
+
 # misc
 .DS_Store
 *.pem
@@ -24,9 +26,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# local env files
-.env*.local
+pnpm-debug.log*
 
 # vercel
 .vercel

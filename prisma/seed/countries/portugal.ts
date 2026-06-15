@@ -1,0 +1,35 @@
+import type { CountrySeed } from "../lib/types";
+
+export const portugal: CountrySeed = {
+  code: "PT",
+  name: "Portugal",
+  continent: "Europe",
+  region: "Southern Europe",
+  currency: "EUR",
+  languages: ["pt", "en"],
+  timezoneOffsets: ["UTC+0", "UTC+1"],
+  avgCostPerDayUsd: 70,
+  safetyIndex: 8.2,
+  visaOnArrival: [],
+  bestMonths: [4, 5, 6, 9, 10],
+  experiences: [
+    { category: "scenic", name: "Tram 28 & Alfama", city: "Lisbon", lat: 38.7118, lng: -9.1300, cost: 4, hours: 3, pop: 9.1, desc: "The yellow tram rattling through the tiled lanes of old Lisbon." },
+    { category: "cultural", name: "Belém Tower & Jerónimos", city: "Lisbon", lat: 38.6916, lng: -9.2160, cost: 18, hours: 3, pop: 9.2, desc: "Manueline riverside monuments from the Age of Discovery — plus a pastel de nata." },
+    { category: "photography", name: "Miradouro Sunset & Castle", city: "Lisbon", lat: 38.7139, lng: -9.1335, cost: 10, hours: 2.5, pop: 8.9, desc: "São Jorge castle and viewpoints over the terracotta rooftops and the Tagus." },
+    { category: "food", name: "Time Out Market & Bifana", city: "Lisbon", lat: 38.7067, lng: -9.1459, cost: 35, hours: 2.5, pop: 8.8, desc: "Top chefs under one roof, plus a classic pork bifana sandwich." },
+    { category: "nightlife", name: "Bairro Alto & Fado", city: "Lisbon", lat: 38.7139, lng: -9.1466, cost: 45, hours: 4, pop: 8.6, desc: "A soulful fado performance, then bar-hopping the steep Bairro Alto." },
+    { category: "scenic", name: "Pena Palace & Sintra", city: "Sintra", lat: 38.7876, lng: -9.3904, cost: 22, hours: 6, pop: 9.4, desc: "A candy-coloured romantic palace among misty forests and the Moorish castle." },
+    { category: "beach", name: "Cascais Coast & Boca do Inferno", city: "Cascais", lat: 38.6979, lng: -9.4215, cost: 10, hours: 4, pop: 8.4, desc: "Seaside town beaches and a dramatic blowhole on the Atlantic cliffs." },
+    { category: "city", name: "Porto Ribeira & Livraria Lello", city: "Porto", lat: 41.1407, lng: -8.6110, cost: 8, hours: 3, pop: 9.0, desc: "The riverside old town and a neo-Gothic bookshop that inspired Harry Potter." },
+    { category: "food", name: "Port Wine Cellar Tasting", city: "Porto", lat: 41.1382, lng: -8.6116, cost: 30, hours: 2.5, pop: 9.0, desc: "Cross to Vila Nova de Gaia for a tour and tasting of aged tawny port." },
+    { category: "scenic", name: "Douro Valley Wine Cruise", city: "Peso da Régua", lat: 41.1639, lng: -7.7886, cost: 95, hours: 7, pop: 9.1, desc: "Cruise the terraced vineyards of the world's oldest demarcated wine region." },
+    { category: "beach", name: "Benagil Cave & Lagos", city: "Lagos", lat: 37.0903, lng: -8.4254, cost: 35, hours: 4, pop: 9.2, desc: "Kayak into the sea cave with a hole in its roof along the Algarve cliffs." },
+    { category: "swimming", name: "Ponta da Piedade Boat", city: "Lagos", lat: 37.0817, lng: -8.6675, cost: 25, hours: 3, pop: 8.7, desc: "Golden grottoes and arches off the Lagos headland." },
+    { category: "adventure", name: "Nazaré Big-Wave Viewpoint", city: "Nazaré", lat: 39.6025, lng: -9.0859, cost: 0, hours: 3, pop: 8.5, desc: "The lighthouse fort above the canyon that produces the planet's biggest surf." },
+    { category: "cultural", name: "Évora & Chapel of Bones", city: "Évora", lat: 38.5714, lng: -7.9135, cost: 8, hours: 4, pop: 8.2, desc: "A Roman temple and a chapel lined with monks' bones in the Alentejo." },
+  ],
+  events: [
+    { name: "Festa de São João", city: "Porto", start: "2026-06-23", end: "2026-06-24", cost: 0, source: "tourism-board:porto", desc: "All-night street party with grilled sardines and plastic hammers." },
+    { name: "NOS Alive Festival", city: "Lisbon", start: "2026-07-09", end: "2026-07-11", cost: 75, source: "eventbrite", category: "music", desc: "Major international acts on the riverfront at Algés." },
+  ],
+};

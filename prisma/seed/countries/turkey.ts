@@ -1,0 +1,36 @@
+import type { CountrySeed } from "../lib/types";
+
+export const turkey: CountrySeed = {
+  code: "TR",
+  name: "Türkiye",
+  continent: "Asia",
+  region: "Western Asia",
+  currency: "TRY",
+  languages: ["tr", "en"],
+  timezoneOffsets: ["UTC+3"],
+  avgCostPerDayUsd: 55,
+  safetyIndex: 6.8,
+  visaOnArrival: [],
+  bestMonths: [4, 5, 6, 9, 10],
+  experiences: [
+    { category: "cultural", name: "Hagia Sophia", city: "Istanbul", lat: 41.0086, lng: 28.98, cost: 25, hours: 2, pop: 9.7, desc: "Byzantine cathedral turned mosque, its vast dome floating over golden mosaics." },
+    { category: "cultural", name: "Blue Mosque & Hippodrome", city: "Istanbul", lat: 41.0054, lng: 28.9768, cost: 0, hours: 2, pop: 9.3, desc: "Six minarets and 20,000 İznik tiles across the square from Hagia Sophia." },
+    { category: "city", name: "Topkapı Palace", city: "Istanbul", lat: 41.0115, lng: 28.9834, cost: 30, hours: 3, pop: 9.2, desc: "Ottoman sultans' palace of treasuries, harem, and Bosphorus terraces." },
+    { category: "food", name: "Grand Bazaar & Street Food", city: "Istanbul", lat: 41.0108, lng: 28.968, cost: 35, hours: 3.5, pop: 9.0, desc: "Spice mounds, simit, and çay through 4,000 stalls of the covered bazaar." },
+    { category: "scenic", name: "Bosphorus Sunset Cruise", city: "Istanbul", lat: 41.0256, lng: 29.0, cost: 30, hours: 2.5, pop: 9.1, desc: "Glide between two continents past waterfront palaces and yalı mansions." },
+    { category: "photography", name: "Cappadocia Balloon Sunrise", city: "Göreme", lat: 38.6431, lng: 34.8289, cost: 200, hours: 3, pop: 9.6, desc: "Hundreds of balloons rise over fairy chimneys at dawn — the signature shot." },
+    { category: "hike", name: "Cappadocia Valley Walk", city: "Göreme", lat: 38.6425, lng: 34.83, cost: 0, hours: 4, pop: 9.0, desc: "Rose and Love Valley trails between cave churches and rock cones." },
+    { category: "cultural", name: "Göreme Open-Air Museum", city: "Göreme", lat: 38.6411, lng: 34.8447, cost: 18, hours: 2.5, pop: 8.8, desc: "Rock-cut Byzantine monasteries with frescoed cave chapels." },
+    { category: "nature", name: "Pamukkale Travertines", city: "Pamukkale", lat: 37.9203, lng: 29.1208, cost: 20, hours: 3, pop: 9.2, desc: "Blinding-white calcite terraces of warm pools above ancient Hierapolis." },
+    { category: "cultural", name: "Ephesus Ancient City", city: "Selçuk", lat: 37.9395, lng: 27.3417, cost: 22, hours: 3.5, pop: 9.3, desc: "Marble streets and the Library of Celsus in the Roman Aegean metropolis." },
+    { category: "beach", name: "Ölüdeniz Blue Lagoon", city: "Fethiye", lat: 36.5486, lng: 29.1163, cost: 15, hours: 5, pop: 8.9, desc: "A sheltered turquoise lagoon below paragliders off Babadağ mountain." },
+    { category: "beach", name: "Antalya Old Harbour & Beaches", city: "Antalya", lat: 36.8841, lng: 30.7056, cost: 20, hours: 5, pop: 8.5, desc: "Roman harbour, Kaleiçi lanes, and Konyaaltı's pebble shore." },
+    { category: "wellness", name: "Traditional Hamam", city: "Istanbul", lat: 41.0086, lng: 28.9694, cost: 45, hours: 2, pop: 8.4, desc: "Steam, scrub, and foam massage in a centuries-old marble bathhouse." },
+    { category: "adventure", name: "Saklıkent Gorge", city: "Fethiye", lat: 36.4922, lng: 29.3886, cost: 25, hours: 4, pop: 8.2, desc: "Wade through icy meltwater into an 18km canyon barely two metres wide." },
+    { category: "food", name: "Gaziantep Baklava & Kebab", city: "Gaziantep", lat: 37.0662, lng: 37.3833, cost: 30, hours: 3, pop: 8.3, desc: "Pistachio baklava and fiery kebabs in Türkiye's UNESCO city of gastronomy." },
+  ],
+  events: [
+    { name: "Istanbul Tulip Festival", city: "Istanbul", start: "2026-04-01", end: "2026-04-30", cost: 0, source: "tourism-board:istanbul", desc: "Millions of tulips bloom across Emirgan Park and the city's gardens." },
+    { name: "Cappadox Festival", city: "Göreme", start: "2026-06-18", end: "2026-06-21", cost: 60, source: "eventbrite", category: "music", desc: "Music, art, and outdoor walks among the valleys of Cappadocia." },
+  ],
+};

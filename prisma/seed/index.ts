@@ -1,395 +1,99 @@
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
+import { countrySeeds } from "./countries";
+import type { CountrySeed } from "./lib/types";
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log("🌍 Seeding Italy...");
-
-  // Seed Italy country
-  const italy = await prisma.country.upsert({
-    where: { code: "IT" },
-    update: {},
+/**
+ * Seeds each country: upserts the master row, ensures a dedicated partition of
+ * the LIST-partitioned country_experiences table exists, then loads its
+ * experiences and sample live events. Idempotent — safe to re-run.
+ */
+async function seedCountry(seed: CountrySeed): Promise<void> {
+  const country = await prisma.country.upsert({
+    where: { code: seed.code },
+    update: {
+      name: seed.name,
+      continent: seed.continent,
+      region: seed.region,
+      currency: seed.currency,
+      languages: seed.languages,
+      timezoneOffsets: seed.timezoneOffsets,
+      avgCostPerDayUsd: seed.avgCostPerDayUsd,
+      safetyIndex: seed.safetyIndex,
+      visaOnArrival: seed.visaOnArrival,
+      bestMonths: seed.bestMonths,
+    },
     create: {
-      code: "IT",
-      name: "Italy",
-      continent: "Europe",
-      region: "Southern Europe",
-      currency: "EUR",
-      languages: ["it", "en"],
-      timezoneOffsets: ["UTC+1", "UTC+2"],
-      avgCostPerDayUsd: new Prisma.Decimal("85"),
-      safetyIndex: new Prisma.Decimal("7.8"),
-      visaOnArrival: [],
-      bestMonths: [4, 5, 9, 10],
+      code: seed.code,
+      name: seed.name,
+      continent: seed.continent,
+      region: seed.region,
+      currency: seed.currency,
+      languages: seed.languages,
+      timezoneOffsets: seed.timezoneOffsets,
+      avgCostPerDayUsd: seed.avgCostPerDayUsd,
+      safetyIndex: seed.safetyIndex,
+      visaOnArrival: seed.visaOnArrival,
+      bestMonths: seed.bestMonths,
     },
   });
 
-  console.log(`✓ Italy created/updated`);
+  // Clear existing rows for this country first so attaching a dedicated
+  // partition never collides with rows sitting in the DEFAULT partition.
+  await prisma.countryExperience.deleteMany({ where: { countryId: country.id } });
+  await prisma.liveEvent.deleteMany({ where: { countryId: country.id } });
 
-  // 24 Experiences from prototype
-  const experiences = [
-    {
-      category: "food",
-      name: "Trastevere Food Tour",
-      city: "Rome",
-      lat: new Prisma.Decimal("41.889"),
-      lng: new Prisma.Decimal("12.469"),
-      cost: new Prisma.Decimal("85"),
-      hours: new Prisma.Decimal("3.5"),
-      pop: new Prisma.Decimal("9.2"),
-      desc: "Evening walking tour through Rome's most beloved food quarter — supplì, porchetta, gelato.",
-    },
-    {
-      category: "food",
-      name: "Fresh Pasta Workshop",
-      city: "Bologna",
-      lat: new Prisma.Decimal("44.494"),
-      lng: new Prisma.Decimal("11.343"),
-      cost: new Prisma.Decimal("70"),
-      hours: new Prisma.Decimal("3"),
-      pop: new Prisma.Decimal("9.0"),
-      desc: "Hand-roll tagliatelle and tortellini with a sfoglina in the food capital of Italy.",
-    },
-    {
-      category: "food",
-      name: "Truffle Hunting in Alba",
-      city: "Alba",
-      lat: new Prisma.Decimal("44.7"),
-      lng: new Prisma.Decimal("8.035"),
-      cost: new Prisma.Decimal("140"),
-      hours: new Prisma.Decimal("4"),
-      pop: new Prisma.Decimal("8.7"),
-      desc: "Hunt white truffles with a trifolau and his dog, then a tasting lunch in the Langhe hills.",
-    },
-    {
-      category: "food",
-      name: "Naples Pizza Pilgrimage",
-      city: "Naples",
-      lat: new Prisma.Decimal("40.851"),
-      lng: new Prisma.Decimal("14.268"),
-      cost: new Prisma.Decimal("35"),
-      hours: new Prisma.Decimal("2.5"),
-      pop: new Prisma.Decimal("9.5"),
-      desc: "The originals: Da Michele, Sorbillo, and wood-fired margherita where pizza was born.",
-    },
-    {
-      category: "food",
-      name: "Chianti Wine Estate Tasting",
-      city: "Siena",
-      lat: new Prisma.Decimal("43.318"),
-      lng: new Prisma.Decimal("11.33"),
-      cost: new Prisma.Decimal("95"),
-      hours: new Prisma.Decimal("5"),
-      pop: new Prisma.Decimal("8.9"),
-      desc: "Drive the SR222 through vineyards, tasting Chianti Classico at two family estates.",
-    },
-    {
-      category: "food_festival",
-      name: "Palermo Street Food Crawl",
-      city: "Palermo",
-      lat: new Prisma.Decimal("38.116"),
-      lng: new Prisma.Decimal("13.361"),
-      cost: new Prisma.Decimal("45"),
-      hours: new Prisma.Decimal("3"),
-      pop: new Prisma.Decimal("8.8"),
-      desc: "Arancine, panelle, and sfincione through the Ballarò and Vucciria markets.",
-    },
-    {
-      category: "hike",
-      name: "Cinque Terre Coastal Trail",
-      city: "Cinque Terre",
-      lat: new Prisma.Decimal("44.127"),
-      lng: new Prisma.Decimal("9.71"),
-      cost: new Prisma.Decimal("8"),
-      hours: new Prisma.Decimal("5"),
-      pop: new Prisma.Decimal("9.4"),
-      desc: "The Sentiero Azzurro between five pastel villages clinging to the Ligurian cliffs.",
-    },
-    {
-      category: "hike",
-      name: "Tre Cime di Lavaredo Loop",
-      city: "Dolomites",
-      lat: new Prisma.Decimal("46.618"),
-      lng: new Prisma.Decimal("12.302"),
-      cost: new Prisma.Decimal("30"),
-      hours: new Prisma.Decimal("4"),
-      pop: new Prisma.Decimal("9.6"),
-      desc: "The most iconic hike in the Dolomites — a 10km loop around three colossal peaks.",
-    },
-    {
-      category: "nature",
-      name: "Saturnia Hot Springs",
-      city: "Saturnia",
-      lat: new Prisma.Decimal("42.649"),
-      lng: new Prisma.Decimal("11.512"),
-      cost: new Prisma.Decimal("0"),
-      hours: new Prisma.Decimal("3"),
-      pop: new Prisma.Decimal("8.5"),
-      desc: "Free cascading thermal pools in the Tuscan Maremma. Go at sunrise.",
-    },
-    {
-      category: "hike",
-      name: "Path of the Gods",
-      city: "Amalfi",
-      lat: new Prisma.Decimal("40.634"),
-      lng: new Prisma.Decimal("14.602"),
-      cost: new Prisma.Decimal("0"),
-      hours: new Prisma.Decimal("4"),
-      pop: new Prisma.Decimal("9.3"),
-      desc: "Cliffside trail from Bomerano to Nocelle, suspended above the Amalfi Coast.",
-    },
-    {
-      category: "scenic",
-      name: "Lake Como Villa Circuit",
-      city: "Como",
-      lat: new Prisma.Decimal("45.985"),
-      lng: new Prisma.Decimal("9.257"),
-      cost: new Prisma.Decimal("40"),
-      hours: new Prisma.Decimal("6"),
-      pop: new Prisma.Decimal("9.0"),
-      desc: "Ferry-hop between Bellagio, Varenna, and Villa del Balbianello's gardens.",
-    },
-    {
-      category: "city",
-      name: "Colosseum & Roman Forum",
-      city: "Rome",
-      lat: new Prisma.Decimal("41.89"),
-      lng: new Prisma.Decimal("12.492"),
-      cost: new Prisma.Decimal("18"),
-      hours: new Prisma.Decimal("4"),
-      pop: new Prisma.Decimal("9.7"),
-      desc: "Underground-and-arena access tour of the ancient heart of the empire.",
-    },
-    {
-      category: "city",
-      name: "Uffizi Gallery",
-      city: "Florence",
-      lat: new Prisma.Decimal("43.768"),
-      lng: new Prisma.Decimal("11.255"),
-      cost: new Prisma.Decimal("26"),
-      hours: new Prisma.Decimal("3"),
-      pop: new Prisma.Decimal("9.5"),
-      desc: "Botticelli, Caravaggio, da Vinci — the Renaissance under one roof.",
-    },
-    {
-      category: "city",
-      name: "Venice: San Marco & Gondola",
-      city: "Venice",
-      lat: new Prisma.Decimal("45.434"),
-      lng: new Prisma.Decimal("12.339"),
-      cost: new Prisma.Decimal("95"),
-      hours: new Prisma.Decimal("4"),
-      pop: new Prisma.Decimal("9.1"),
-      desc: "Basilica mosaics, Doge's Palace, and a back-canal gondola at golden hour.",
-    },
-    {
-      category: "city",
-      name: "Pompeii with Archaeologist",
-      city: "Naples",
-      lat: new Prisma.Decimal("40.749"),
-      lng: new Prisma.Decimal("14.485"),
-      cost: new Prisma.Decimal("55"),
-      hours: new Prisma.Decimal("4"),
-      pop: new Prisma.Decimal("9.4"),
-      desc: "The frozen Roman city, guided by a working archaeologist. Vesuvius add-on.",
-    },
-    {
-      category: "concert",
-      name: "Opera at Arena di Verona",
-      city: "Verona",
-      lat: new Prisma.Decimal("45.439"),
-      lng: new Prisma.Decimal("10.994"),
-      cost: new Prisma.Decimal("60"),
-      hours: new Prisma.Decimal("4"),
-      pop: new Prisma.Decimal("9.2"),
-      desc: "Aida under the stars in a 2,000-year-old Roman amphitheatre.",
-    },
-    {
-      category: "music",
-      name: "Umbria Jazz Evening",
-      city: "Perugia",
-      lat: new Prisma.Decimal("43.112"),
-      lng: new Prisma.Decimal("12.389"),
-      cost: new Prisma.Decimal("40"),
-      hours: new Prisma.Decimal("4"),
-      pop: new Prisma.Decimal("8.6"),
-      desc: "Europe's great jazz festival takes over Perugia's medieval streets each July.",
-    },
-    {
-      category: "concert",
-      name: "Teatro San Carlo Performance",
-      city: "Naples",
-      lat: new Prisma.Decimal("40.837"),
-      lng: new Prisma.Decimal("14.249"),
-      cost: new Prisma.Decimal("50"),
-      hours: new Prisma.Decimal("3"),
-      pop: new Prisma.Decimal("8.4"),
-      desc: "Europe's oldest working opera house, gilded and gorgeous.",
-    },
-    {
-      category: "beach",
-      name: "Positano Beach Day",
-      city: "Amalfi",
-      lat: new Prisma.Decimal("40.628"),
-      lng: new Prisma.Decimal("14.485"),
-      cost: new Prisma.Decimal("30"),
-      hours: new Prisma.Decimal("5"),
-      pop: new Prisma.Decimal("8.9"),
-      desc: "Spiaggia Grande sunbeds, cliff-jumping at Fornillo, Aperol at sunset.",
-    },
-    {
-      category: "swimming",
-      name: "Capri Blue Grotto Swim",
-      city: "Capri",
-      lat: new Prisma.Decimal("40.561"),
-      lng: new Prisma.Decimal("14.205"),
-      cost: new Prisma.Decimal("75"),
-      hours: new Prisma.Decimal("6"),
-      pop: new Prisma.Decimal("9.0"),
-      desc: "Boat circuit of the island with a swim stop in electric-blue sea caves.",
-    },
-    {
-      category: "beach",
-      name: "San Vito Lo Capo",
-      city: "Sicily",
-      lat: new Prisma.Decimal("38.174"),
-      lng: new Prisma.Decimal("12.735"),
-      cost: new Prisma.Decimal("15"),
-      hours: new Prisma.Decimal("6"),
-      pop: new Prisma.Decimal("8.7"),
-      desc: "Caribbean-clear water beneath Monte Monaco on Sicily's northwest tip.",
-    },
-    {
-      category: "nightlife",
-      name: "Navigli Aperitivo Crawl",
-      city: "Milan",
-      lat: new Prisma.Decimal("45.452"),
-      lng: new Prisma.Decimal("9.176"),
-      cost: new Prisma.Decimal("35"),
-      hours: new Prisma.Decimal("3"),
-      pop: new Prisma.Decimal("8.3"),
-      desc: "Canal-side spritz culture — pay for a drink, eat the buffet.",
-    },
-    {
-      category: "photography",
-      name: "Val d'Orcia at Dawn",
-      city: "Siena",
-      lat: new Prisma.Decimal("43.06"),
-      lng: new Prisma.Decimal("11.69"),
-      cost: new Prisma.Decimal("0"),
-      hours: new Prisma.Decimal("3"),
-      pop: new Prisma.Decimal("9.1"),
-      desc: "Cypress lanes, rolling wheat, morning fog — Tuscany's most photographed valley.",
-    },
-    {
-      category: "wellness",
-      name: "Tuscan Thermal Spa",
-      city: "Montecatini",
-      lat: new Prisma.Decimal("43.88"),
-      lng: new Prisma.Decimal("10.77"),
-      cost: new Prisma.Decimal("65"),
-      hours: new Prisma.Decimal("4"),
-      pop: new Prisma.Decimal("8.0"),
-      desc: "Art-nouveau terme: thermal pools, steam grottoes, and a very long lunch after.",
-    },
-  ];
+  const partition = `country_experiences_${seed.code.toLowerCase()}`;
+  await prisma.$executeRawUnsafe(
+    `CREATE TABLE IF NOT EXISTS "${partition}" PARTITION OF "country_experiences" FOR VALUES IN ('${country.id}')`,
+  );
 
-  for (const exp of experiences) {
+  for (const e of seed.experiences) {
     await prisma.countryExperience.create({
       data: {
-        countryId: italy.id,
-        category: exp.category,
-        name: exp.name,
-        description: exp.desc,
-        locationCity: exp.city,
-        locationLat: exp.lat,
-        locationLng: exp.lng,
-        avgCostUsd: exp.cost,
-        durationHours: exp.hours,
-        bestSeason: [],
-        accessibility: new Prisma.Decimal("7"),
-        popularityScore: exp.pop,
+        countryId: country.id,
+        category: e.category,
+        name: e.name,
+        description: e.desc,
+        locationCity: e.city,
+        locationLat: e.lat,
+        locationLng: e.lng,
+        avgCostUsd: e.cost,
+        durationHours: e.hours,
+        bestSeason: e.bestSeason ?? [],
+        accessibility: e.accessibility ?? 7,
+        popularityScore: e.pop,
       },
     });
   }
 
-  console.log(`✓ 24 experiences created for Italy`);
-
-  // 6 Live Events from prototype
-  const liveEvents = [
-    {
-      name: "Calcio Storico Final",
-      city: "Florence",
-      start: new Date("2026-06-24"),
-      end: new Date("2026-06-24"),
-      cost: new Prisma.Decimal("30"),
-      source: "tourism-board:firenze",
-      desc: "Renaissance-costume historic football in Piazza Santa Croce.",
-    },
-    {
-      name: "Arena di Verona Opera Festival",
-      city: "Verona",
-      start: new Date("2026-06-12"),
-      end: new Date("2026-09-05"),
-      cost: new Prisma.Decimal("60"),
-      source: "eventbrite",
-      desc: "Nightly opera in the Roman arena all summer.",
-    },
-    {
-      name: "Luminara di San Ranieri",
-      city: "Pisa",
-      start: new Date("2026-06-16"),
-      end: new Date("2026-06-16"),
-      cost: new Prisma.Decimal("0"),
-      source: "tourism-board:pisa",
-      desc: "70,000 candles light the Arno riverfront for one night.",
-    },
-    {
-      name: "Umbria Jazz Festival",
-      city: "Perugia",
-      start: new Date("2026-07-10"),
-      end: new Date("2026-07-19"),
-      cost: new Prisma.Decimal("40"),
-      source: "residentadvisor",
-      desc: "Ten days of jazz across Perugia's old town.",
-    },
-    {
-      name: "Ravello Festival Opening",
-      city: "Amalfi",
-      start: new Date("2026-06-28"),
-      end: new Date("2026-08-30"),
-      cost: new Prisma.Decimal("45"),
-      source: "eventbrite",
-      desc: "Symphonies on a terrace 350m above the Tyrrhenian Sea.",
-    },
-    {
-      name: "Taormina Film Fest",
-      city: "Sicily",
-      start: new Date("2026-06-13"),
-      end: new Date("2026-06-19"),
-      cost: new Prisma.Decimal("25"),
-      source: "eventbrite",
-      desc: "Screenings in the ancient Greek theatre with Etna behind the screen.",
-    },
-  ];
-
-  for (const event of liveEvents) {
+  for (const ev of seed.events ?? []) {
     await prisma.liveEvent.create({
       data: {
-        countryId: italy.id,
-        name: event.name,
-        city: event.city,
-        category: "event",
-        startDate: event.start,
-        endDate: event.end,
-        description: event.desc,
-        estimatedCostUsd: event.cost,
-        source: event.source,
+        countryId: country.id,
+        name: ev.name,
+        city: ev.city,
+        category: ev.category ?? "event",
+        startDate: new Date(ev.start),
+        endDate: new Date(ev.end),
+        description: ev.desc,
+        estimatedCostUsd: ev.cost,
+        source: ev.source,
       },
     });
   }
 
-  console.log(`✓ 6 live events created for Italy`);
+  console.log(
+    `✓ ${seed.name} (${seed.code}): ${seed.experiences.length} experiences, ${seed.events?.length ?? 0} events`,
+  );
+}
+
+async function main() {
+  console.log(`🌍 Seeding ${countrySeeds.length} countries…`);
+  for (const seed of countrySeeds) {
+    await seedCountry(seed);
+  }
   console.log("🌍 Seed complete!");
 }
 

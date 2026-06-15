@@ -1,0 +1,36 @@
+import type { CountrySeed } from "../lib/types";
+
+export const mexico: CountrySeed = {
+  code: "MX",
+  name: "Mexico",
+  continent: "North America",
+  region: "Central America",
+  currency: "MXN",
+  languages: ["es"],
+  timezoneOffsets: ["UTC-6", "UTC-7"],
+  avgCostPerDayUsd: 55,
+  safetyIndex: 6.2,
+  visaOnArrival: [],
+  bestMonths: [11, 12, 1, 2, 3, 4],
+  experiences: [
+    { category: "cultural", name: "Teotihuacán Pyramids", city: "Mexico City", lat: 19.6925, lng: -98.8438, cost: 25, hours: 5, pop: 9.5, desc: "Climb the Pyramid of the Sun along the Avenue of the Dead north of the capital." },
+    { category: "city", name: "Frida Kahlo Casa Azul", city: "Mexico City", lat: 19.355, lng: -99.1624, cost: 16, hours: 2, pop: 9.0, desc: "Frida's blue house in Coyoacán, her studio and garden preserved." },
+    { category: "food", name: "Mercado & Taco Crawl", city: "Mexico City", lat: 19.4326, lng: -99.1332, cost: 35, hours: 3, pop: 9.2, desc: "Al pastor, tlacoyos, and mezcal through markets and street stands." },
+    { category: "cultural", name: "Chichén Itzá", city: "Valladolid", lat: 20.6843, lng: -88.5678, cost: 35, hours: 5, pop: 9.6, desc: "El Castillo pyramid and the great ball court of the Maya-Toltec city." },
+    { category: "swimming", name: "Cenote Swim near Valladolid", city: "Valladolid", lat: 20.6667, lng: -88.2, cost: 15, hours: 3, pop: 9.0, desc: "Drop into a sinkhole of cool clear water hung with vines and stalactites." },
+    { category: "beach", name: "Tulum Ruins & Beach", city: "Tulum", lat: 20.2114, lng: -87.4654, cost: 30, hours: 5, pop: 9.1, desc: "Clifftop Maya ruins above a Caribbean beach of powder sand." },
+    { category: "swimming", name: "Cozumel Reef Snorkel", city: "Cozumel", lat: 20.4230, lng: -86.9223, cost: 45, hours: 4, pop: 8.7, desc: "Drift-snorkel the Mesoamerican Reef's coral and parrotfish." },
+    { category: "city", name: "Oaxaca Centro & Mezcal", city: "Oaxaca", lat: 17.0732, lng: -96.7266, cost: 40, hours: 4, pop: 8.9, desc: "Colonial streets, mole tasting, and a palenque mezcal sampling." },
+    { category: "nature", name: "Hierve el Agua", city: "Oaxaca", lat: 16.8656, lng: -96.2761, cost: 12, hours: 5, pop: 8.6, desc: "Petrified mineral 'waterfalls' and infinity spring pools over a valley." },
+    { category: "scenic", name: "Guanajuato Colourful Streets", city: "Guanajuato", lat: 21.0190, lng: -101.2574, cost: 0, hours: 3, pop: 8.7, desc: "Funicular over a rainbow hillside of alleys, plazas, and tunnels." },
+    { category: "photography", name: "San Miguel de Allende", city: "San Miguel de Allende", lat: 20.9144, lng: -100.7436, cost: 0, hours: 3, pop: 8.8, desc: "Pink neo-Gothic parroquia and cobblestone lanes of an artists' town." },
+    { category: "adventure", name: "Copper Canyon Rail", city: "Creel", lat: 27.7517, lng: -107.635, cost: 90, hours: 7, pop: 8.3, desc: "Ride El Chepe through canyons deeper and wider than the Grand Canyon." },
+    { category: "nightlife", name: "Playa del Carmen Quinta", city: "Playa del Carmen", lat: 20.6296, lng: -87.0739, cost: 40, hours: 4, pop: 8.2, desc: "Beach clubs and rooftop bars along Fifth Avenue." },
+    { category: "food", name: "Puebla Cuisine & Talavera", city: "Puebla", lat: 19.0414, lng: -98.2063, cost: 35, hours: 4, pop: 8.4, desc: "Mole poblano and chiles en nogada in the birthplace of both." },
+  ],
+  events: [
+    { name: "Día de los Muertos", city: "Oaxaca", start: "2026-10-31", end: "2026-11-02", cost: 0, source: "tourism-board:oaxaca", desc: "Marigold altars, candlelit cemeteries, and parades for the Day of the Dead." },
+    { name: "Guelaguetza Festival", city: "Oaxaca", start: "2026-07-20", end: "2026-07-27", cost: 25, source: "eventbrite", category: "food_festival", desc: "Indigenous dance, costume, and food from across Oaxaca's regions." },
+    { name: "Cervantino Festival", city: "Guanajuato", start: "2026-10-07", end: "2026-10-25", cost: 30, source: "eventbrite", category: "music", desc: "Latin America's biggest arts festival fills Guanajuato's plazas." },
+  ],
+};

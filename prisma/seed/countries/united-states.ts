@@ -1,0 +1,37 @@
+import type { CountrySeed } from "../lib/types";
+
+export const unitedStates: CountrySeed = {
+  code: "US",
+  name: "United States",
+  continent: "North America",
+  region: "Northern America",
+  currency: "USD",
+  languages: ["en", "es"],
+  timezoneOffsets: ["UTC-5", "UTC-6", "UTC-7", "UTC-8", "UTC-10"],
+  avgCostPerDayUsd: 160,
+  safetyIndex: 6.9,
+  visaOnArrival: [],
+  bestMonths: [4, 5, 6, 9, 10],
+  experiences: [
+    { category: "city", name: "Statue of Liberty & Ellis Island", city: "New York", lat: 40.6892, lng: -74.0445, cost: 25, hours: 4, pop: 9.5, desc: "Ferry to Liberty Island and the immigration museum at Ellis Island." },
+    { category: "city", name: "Central Park & The Met", city: "New York", lat: 40.7794, lng: -73.9632, cost: 30, hours: 4, pop: 9.3, desc: "A walk through the park into the Metropolitan Museum's two million works." },
+    { category: "photography", name: "Top of the Rock at Dusk", city: "New York", lat: 40.7593, lng: -73.9794, cost: 40, hours: 1.5, pop: 9.0, desc: "The Empire State and Central Park from the Rockefeller Center deck at golden hour." },
+    { category: "city", name: "National Mall Monuments", city: "Washington", lat: 38.8895, lng: -77.0353, cost: 0, hours: 5, pop: 8.8, desc: "Lincoln Memorial to the Capitol past the free Smithsonian museums." },
+    { category: "nature", name: "Grand Canyon South Rim", city: "Grand Canyon", lat: 36.0544, lng: -112.1401, cost: 35, hours: 6, pop: 9.7, desc: "Mile-deep layered canyon; walk the Rim Trail or descend Bright Angel." },
+    { category: "hike", name: "Zion Narrows Wade", city: "Springdale", lat: 37.2982, lng: -112.9476, cost: 35, hours: 6, pop: 9.4, desc: "Hike up the Virgin River between thousand-foot sandstone walls." },
+    { category: "nature", name: "Yosemite Valley & Falls", city: "Yosemite", lat: 37.7459, lng: -119.5936, cost: 35, hours: 7, pop: 9.5, desc: "Granite giants El Capitan and Half Dome over a meadow valley floor." },
+    { category: "beach", name: "Waikiki & Diamond Head", city: "Honolulu", lat: 21.2619, lng: -157.8056, cost: 25, hours: 5, pop: 9.1, desc: "Sunrise crater hike then surf lessons on Waikiki Beach." },
+    { category: "nightlife", name: "New Orleans Jazz & French Quarter", city: "New Orleans", lat: 29.9584, lng: -90.0644, cost: 45, hours: 4, pop: 8.9, desc: "Live brass on Frenchmen Street, beignets, and Creole bars." },
+    { category: "city", name: "Golden Gate & Alcatraz", city: "San Francisco", lat: 37.827, lng: -122.4230, cost: 45, hours: 5, pop: 9.2, desc: "Bike the bridge then ferry to the infamous island prison." },
+    { category: "scenic", name: "Antelope Canyon & Horseshoe Bend", city: "Page", lat: 36.8619, lng: -111.3743, cost: 75, hours: 4, pop: 9.0, desc: "Light beams in the slot canyon, then the Colorado's great horseshoe meander." },
+    { category: "city", name: "Times Square & Broadway Show", city: "New York", lat: 40.7580, lng: -73.9855, cost: 120, hours: 3.5, pop: 9.0, desc: "Neon canyon of Midtown and an evening Broadway musical." },
+    { category: "food", name: "Mission District Food Tour", city: "San Francisco", lat: 37.7599, lng: -122.4148, cost: 70, hours: 3, pop: 8.4, desc: "Burritos, taquerias, and Mission murals in SF's most flavorful neighborhood." },
+    { category: "nature", name: "Yellowstone Geysers", city: "Yellowstone", lat: 44.4605, lng: -110.8281, cost: 35, hours: 7, pop: 9.3, desc: "Old Faithful, rainbow hot springs, and bison on the Grand Loop." },
+    { category: "city", name: "Las Vegas Strip After Dark", city: "Las Vegas", lat: 36.1147, lng: -115.1728, cost: 60, hours: 4, pop: 8.5, desc: "Fountains, casinos, and neon along the world's most extravagant boulevard." },
+  ],
+  events: [
+    { name: "SXSW", city: "Austin", start: "2026-03-13", end: "2026-03-22", cost: 0, source: "eventbrite", category: "music", desc: "Music, film, and tech take over Austin for ten days each March." },
+    { name: "Macy's July 4th Fireworks", city: "New York", start: "2026-07-04", end: "2026-07-04", cost: 0, source: "tourism-board:nyc", desc: "The country's largest fireworks display over the East River." },
+    { name: "New Orleans Jazz Fest", city: "New Orleans", start: "2026-04-23", end: "2026-05-03", cost: 95, source: "eventbrite", category: "music", desc: "Two weekends of jazz, blues, and Cajun food at the Fair Grounds." },
+  ],
+};

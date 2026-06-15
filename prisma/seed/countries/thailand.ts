@@ -1,0 +1,36 @@
+import type { CountrySeed } from "../lib/types";
+
+export const thailand: CountrySeed = {
+  code: "TH",
+  name: "Thailand",
+  continent: "Asia",
+  region: "Southeast Asia",
+  currency: "THB",
+  languages: ["th"],
+  timezoneOffsets: ["UTC+7"],
+  avgCostPerDayUsd: 45,
+  safetyIndex: 7.0,
+  visaOnArrival: [],
+  bestMonths: [11, 12, 1, 2],
+  experiences: [
+    { category: "cultural", name: "Grand Palace & Wat Phra Kaew", city: "Bangkok", lat: 13.75, lng: 100.4913, cost: 16, hours: 3, pop: 9.4, desc: "Gilded spires and the revered Emerald Buddha in Bangkok's royal complex." },
+    { category: "cultural", name: "Wat Pho Reclining Buddha", city: "Bangkok", lat: 13.7465, lng: 100.4927, cost: 6, hours: 1.5, pop: 9.0, desc: "A 46m gold reclining Buddha and the home of Thai massage." },
+    { category: "food", name: "Bangkok Street Food & Tuk-Tuk", city: "Bangkok", lat: 13.7398, lng: 100.5126, cost: 30, hours: 4, pop: 9.3, desc: "Pad thai, boat noodles, and mango sticky rice by tuk-tuk through Chinatown." },
+    { category: "nightlife", name: "Bangkok Rooftop Bars", city: "Bangkok", lat: 13.7223, lng: 100.5144, cost: 45, hours: 3, pop: 8.5, desc: "Sky-high cocktails over the glittering sprawl of the city." },
+    { category: "cultural", name: "Old City Temples by Bike", city: "Chiang Mai", lat: 18.7883, lng: 98.9853, cost: 20, hours: 4, pop: 9.0, desc: "Cycle the moated old town's lanes between dozens of Lanna temples." },
+    { category: "wildlife", name: "Ethical Elephant Sanctuary", city: "Chiang Mai", lat: 19.05, lng: 98.85, cost: 80, hours: 6, pop: 9.2, desc: "Feed and bathe rescued elephants at a no-riding sanctuary in the hills." },
+    { category: "nature", name: "Doi Inthanon National Park", city: "Chiang Mai", lat: 18.5887, lng: 98.4867, cost: 35, hours: 7, pop: 8.6, desc: "Thailand's highest peak, twin pagodas, waterfalls, and Hmong markets." },
+    { category: "beach", name: "Phi Phi Islands & Maya Bay", city: "Krabi", lat: 7.6783, lng: 98.7672, cost: 50, hours: 7, pop: 9.3, desc: "Longtail boat to limestone karsts and the turquoise cove of Maya Bay." },
+    { category: "swimming", name: "Railay Beach & Snorkel", city: "Krabi", lat: 8.0108, lng: 98.8377, cost: 30, hours: 5, pop: 8.9, desc: "Climbers' cliffs and clear water on a peninsula reachable only by boat." },
+    { category: "beach", name: "Phuket Old Town & Beaches", city: "Phuket", lat: 7.8804, lng: 98.3923, cost: 25, hours: 5, pop: 8.4, desc: "Sino-Portuguese shophouses, then sunset on Kata or Karon beach." },
+    { category: "food", name: "Thai Cooking Class", city: "Chiang Mai", lat: 18.79, lng: 98.99, cost: 35, hours: 4, pop: 8.7, desc: "Market tour then cook green curry and tom yum with a local chef." },
+    { category: "swimming", name: "Erawan Falls", city: "Kanchanaburi", lat: 14.3717, lng: 99.1442, cost: 9, hours: 5, pop: 8.5, desc: "Swim the seven-tier emerald waterfall in the jungle west of Bangkok." },
+    { category: "scenic", name: "Ayutthaya Ruins", city: "Ayutthaya", lat: 14.3692, lng: 100.5877, cost: 12, hours: 5, pop: 8.6, desc: "The Buddha head wrapped in tree roots among a former capital's brick temples." },
+    { category: "nightlife", name: "Full Moon Party", city: "Ko Pha-ngan", lat: 9.6783, lng: 100.0561, cost: 20, hours: 5, pop: 8.0, desc: "Beachfront all-night party under the full moon on Haad Rin." },
+  ],
+  events: [
+    { name: "Songkran Water Festival", city: "Chiang Mai", start: "2026-04-13", end: "2026-04-15", cost: 0, source: "tourism-board:thailand", desc: "City-wide water fights for the Thai New Year." },
+    { name: "Yi Peng Lantern Festival", city: "Chiang Mai", start: "2026-11-24", end: "2026-11-25", cost: 0, source: "eventbrite", desc: "Thousands of paper lanterns released into the night sky." },
+    { name: "Loy Krathong", city: "Bangkok", start: "2026-11-24", end: "2026-11-25", cost: 0, source: "tourism-board:thailand", desc: "Candlelit floats set adrift on rivers and canals nationwide." },
+  ],
+};

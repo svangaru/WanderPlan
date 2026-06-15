@@ -1,0 +1,37 @@
+import type { CountrySeed } from "../lib/types";
+
+export const france: CountrySeed = {
+  code: "FR",
+  name: "France",
+  continent: "Europe",
+  region: "Western Europe",
+  currency: "EUR",
+  languages: ["fr", "en"],
+  timezoneOffsets: ["UTC+1", "UTC+2"],
+  avgCostPerDayUsd: 110,
+  safetyIndex: 7.5,
+  visaOnArrival: [],
+  bestMonths: [5, 6, 9, 10],
+  experiences: [
+    { category: "city", name: "Louvre Highlights Tour", city: "Paris", lat: 48.8606, lng: 2.3376, cost: 22, hours: 3, pop: 9.7, desc: "Mona Lisa, Venus de Milo, and the Egyptian wing with a guide who skips the queue." },
+    { category: "city", name: "Eiffel Tower Summit", city: "Paris", lat: 48.8584, lng: 2.2945, cost: 30, hours: 2, pop: 9.6, desc: "Lift to the top for the Haussmann rooftops; come at dusk for the hourly sparkle." },
+    { category: "food", name: "Le Marais Food Walk", city: "Paris", lat: 48.8575, lng: 2.3622, cost: 90, hours: 3, pop: 9.1, desc: "Falafel, fromage, and pâtisserie through the medieval streets of the Marais." },
+    { category: "photography", name: "Montmartre & Sacré-Cœur", city: "Paris", lat: 48.8867, lng: 2.3431, cost: 0, hours: 3, pop: 9.0, desc: "Climb to the white basilica, then artists' square and the city laid out below." },
+    { category: "food", name: "Champagne Cellar Tasting", city: "Reims", lat: 49.2583, lng: 4.0317, cost: 75, hours: 4, pop: 8.7, desc: "Down into the chalk caves of a grande maison for a guided flight of cuvées." },
+    { category: "scenic", name: "Mont-Saint-Michel", city: "Mont-Saint-Michel", lat: 48.636, lng: -1.5114, cost: 13, hours: 5, pop: 9.4, desc: "The tidal-island abbey rising from the bay; cross the causeway at low tide." },
+    { category: "cultural", name: "Palace of Versailles", city: "Versailles", lat: 48.8049, lng: 2.1204, cost: 27, hours: 5, pop: 9.3, desc: "Hall of Mirrors, the King's apartments, and the endless geometric gardens." },
+    { category: "food", name: "Lyon Bouchon Lunch", city: "Lyon", lat: 45.764, lng: 4.8357, cost: 55, hours: 2.5, pop: 8.8, desc: "Quenelles and praline tart in a traditional bouchon, France's gastronomic capital." },
+    { category: "beach", name: "Calanques de Cassis Boat", city: "Marseille", lat: 43.2148, lng: 5.5126, cost: 35, hours: 4, pop: 8.9, desc: "Boat into limestone fjords of turquoise water south of Marseille." },
+    { category: "nightlife", name: "Nice Old Town & Riviera Bars", city: "Nice", lat: 43.6961, lng: 7.2756, cost: 40, hours: 4, pop: 8.4, desc: "Socca by the sea, then cocktail bars in Vieux Nice off the Cours Saleya." },
+    { category: "hike", name: "Chamonix Mont Blanc Cable Car", city: "Chamonix", lat: 45.9237, lng: 6.8694, cost: 75, hours: 6, pop: 9.2, desc: "Aiguille du Midi to 3,842m for glacier views over the roof of the Alps." },
+    { category: "nature", name: "Gorges du Verdon Kayak", city: "Verdon", lat: 43.749, lng: 6.3286, cost: 45, hours: 5, pop: 8.6, desc: "Paddle Europe's grandest canyon beneath 700m emerald walls." },
+    { category: "food", name: "Provence Lavender & Market", city: "Avignon", lat: 43.9493, lng: 4.8055, cost: 60, hours: 6, pop: 8.7, desc: "Valensole lavender fields then a Provençal market of olives, herbs, and rosé." },
+    { category: "cultural", name: "Bordeaux Wine & Cité du Vin", city: "Bordeaux", lat: 44.8625, lng: -0.5503, cost: 50, hours: 4, pop: 8.5, desc: "The wine museum, then tastings of left-bank reds along the Garonne." },
+    { category: "city", name: "Carcassonne Medieval City", city: "Carcassonne", lat: 43.2061, lng: 2.3639, cost: 18, hours: 3, pop: 8.4, desc: "Walk the double-walled ramparts of Europe's largest intact medieval fortress." },
+  ],
+  events: [
+    { name: "Fête de la Musique", city: "Paris", start: "2026-06-21", end: "2026-06-21", cost: 0, source: "tourism-board:paris", category: "music", desc: "Free music takes over every street and square across France for one night." },
+    { name: "Cannes Film Festival", city: "Cannes", start: "2026-05-12", end: "2026-05-23", cost: 0, source: "eventbrite", desc: "The Croisette fills with premieres, stars, and red-carpet crowds." },
+    { name: "Bastille Day Fireworks", city: "Paris", start: "2026-07-14", end: "2026-07-14", cost: 0, source: "tourism-board:paris", desc: "Fireworks over the Eiffel Tower after the Champs-Élysées parade." },
+  ],
+};

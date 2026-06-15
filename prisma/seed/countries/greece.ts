@@ -1,0 +1,35 @@
+import type { CountrySeed } from "../lib/types";
+
+export const greece: CountrySeed = {
+  code: "GR",
+  name: "Greece",
+  continent: "Europe",
+  region: "Southern Europe",
+  currency: "EUR",
+  languages: ["el", "en"],
+  timezoneOffsets: ["UTC+2", "UTC+3"],
+  avgCostPerDayUsd: 75,
+  safetyIndex: 7.6,
+  visaOnArrival: [],
+  bestMonths: [5, 6, 9, 10],
+  experiences: [
+    { category: "cultural", name: "Acropolis & Parthenon", city: "Athens", lat: 37.9715, lng: 23.7257, cost: 20, hours: 3, pop: 9.7, desc: "The marble temples of the classical age crowning Athens." },
+    { category: "cultural", name: "Acropolis Museum", city: "Athens", lat: 37.9682, lng: 23.7286, cost: 15, hours: 2, pop: 9.0, desc: "The Parthenon marbles displayed in light with the temple in view." },
+    { category: "food", name: "Plaka & Central Market Food Walk", city: "Athens", lat: 37.9755, lng: 23.7269, cost: 45, hours: 3, pop: 8.8, desc: "Souvlaki, loukoumades, and meze through old Athens and the Varvakios market." },
+    { category: "photography", name: "Oia Sunset", city: "Santorini", lat: 36.4618, lng: 25.3753, cost: 0, hours: 2.5, pop: 9.5, desc: "White-and-blue cliff village above the caldera at the world's most-photographed sunset." },
+    { category: "beach", name: "Santorini Caldera Cruise", city: "Santorini", lat: 36.4, lng: 25.4, cost: 75, hours: 5, pop: 9.1, desc: "Sail to the volcano, hot springs, and Thirassia with a sunset return." },
+    { category: "beach", name: "Mykonos Beaches & Windmills", city: "Mykonos", lat: 37.4467, lng: 25.3289, cost: 40, hours: 5, pop: 8.8, desc: "Paraga and Super Paradise beaches, then Little Venice at dusk." },
+    { category: "nightlife", name: "Mykonos Town After Dark", city: "Mykonos", lat: 37.4452, lng: 25.3287, cost: 60, hours: 4, pop: 8.5, desc: "Cocktail bars and clubs winding through the whitewashed Chora." },
+    { category: "cultural", name: "Delphi Oracle Site", city: "Delphi", lat: 38.4824, lng: 22.5010, cost: 12, hours: 4, pop: 8.9, desc: "The Temple of Apollo and theatre on the slopes of Mount Parnassus." },
+    { category: "scenic", name: "Meteora Monasteries", city: "Kalambaka", lat: 39.7217, lng: 21.6306, cost: 15, hours: 5, pop: 9.3, desc: "Byzantine monasteries perched atop sheer sandstone pillars." },
+    { category: "swimming", name: "Navagio Shipwreck Beach", city: "Zakynthos", lat: 37.8594, lng: 20.625, cost: 35, hours: 5, pop: 9.0, desc: "A rusting wreck on white sand in a cove of impossible blue, reachable only by boat." },
+    { category: "cultural", name: "Knossos Palace", city: "Heraklion", lat: 35.2980, lng: 25.1631, cost: 15, hours: 3, pop: 8.7, desc: "The Minoan labyrinth-palace of frescoes and the legend of the Minotaur." },
+    { category: "hike", name: "Samaria Gorge", city: "Chania", lat: 35.3, lng: 23.9667, cost: 8, hours: 6, pop: 8.6, desc: "A 16km descent through Crete's White Mountains to the Libyan Sea." },
+    { category: "food", name: "Cretan Cooking & Raki", city: "Chania", lat: 35.5138, lng: 24.018, cost: 65, hours: 4, pop: 8.4, desc: "Farm-to-table Cretan dishes and raki in a Venetian-harbour town." },
+    { category: "scenic", name: "Nafplio Old Town & Palamidi", city: "Nafplio", lat: 37.5681, lng: 22.8027, cost: 8, hours: 4, pop: 8.3, desc: "999 steps to a Venetian fortress over Greece's prettiest seaside town." },
+  ],
+  events: [
+    { name: "Athens & Epidaurus Festival", city: "Athens", start: "2026-06-01", end: "2026-08-15", cost: 35, source: "eventbrite", category: "concert", desc: "Theatre and music in the ancient Odeon of Herodes Atticus." },
+    { name: "Ochi Day Celebrations", city: "Athens", start: "2026-10-28", end: "2026-10-28", cost: 0, source: "tourism-board:greece", desc: "National-day parades and flag-draped streets nationwide." },
+  ],
+};

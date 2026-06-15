@@ -1,0 +1,37 @@
+import type { CountrySeed } from "../lib/types";
+
+export const spain: CountrySeed = {
+  code: "ES",
+  name: "Spain",
+  continent: "Europe",
+  region: "Southern Europe",
+  currency: "EUR",
+  languages: ["es", "ca", "en"],
+  timezoneOffsets: ["UTC+1", "UTC+2"],
+  avgCostPerDayUsd: 80,
+  safetyIndex: 7.9,
+  visaOnArrival: [],
+  bestMonths: [4, 5, 6, 9, 10],
+  experiences: [
+    { category: "city", name: "Sagrada Família", city: "Barcelona", lat: 41.4036, lng: 2.1744, cost: 30, hours: 2.5, pop: 9.7, desc: "Gaudí's still-unfinished basilica where light pours through forest-like columns." },
+    { category: "city", name: "Park Güell", city: "Barcelona", lat: 41.4145, lng: 2.1527, cost: 13, hours: 2.5, pop: 9.1, desc: "Mosaic dragons and serpentine benches over the rooftops of Barcelona." },
+    { category: "food", name: "La Boqueria & Tapas Crawl", city: "Barcelona", lat: 41.3817, lng: 2.1717, cost: 55, hours: 3, pop: 9.0, desc: "Jamón, pintxos, and cava through the great market and El Born's bars." },
+    { category: "cultural", name: "Alhambra & Generalife", city: "Granada", lat: 37.176, lng: -3.5881, cost: 19, hours: 4, pop: 9.6, desc: "Moorish palaces, carved stucco, and water gardens above Granada." },
+    { category: "cultural", name: "Mosque-Cathedral of Córdoba", city: "Córdoba", lat: 37.8790, lng: -4.7794, cost: 13, hours: 2.5, pop: 9.2, desc: "Endless red-and-white arches in one of Islam's greatest surviving monuments." },
+    { category: "food", name: "Seville Flamenco & Tapas", city: "Seville", lat: 37.3886, lng: -5.9953, cost: 45, hours: 3.5, pop: 9.0, desc: "An intimate tablao show, then jamón and sherry in Santa Cruz." },
+    { category: "city", name: "Royal Alcázar of Seville", city: "Seville", lat: 37.3831, lng: -5.9903, cost: 15, hours: 2.5, pop: 9.1, desc: "Mudéjar palace of tiled courtyards (and a Game of Thrones filming site)." },
+    { category: "city", name: "Prado Museum", city: "Madrid", lat: 40.4138, lng: -3.6921, cost: 15, hours: 3, pop: 9.0, desc: "Velázquez, Goya, and Bosch in Spain's national art treasury." },
+    { category: "nightlife", name: "Madrid Late-Night Tapas", city: "Madrid", lat: 40.4153, lng: -3.7074, cost: 40, hours: 4, pop: 8.5, desc: "La Latina's bar-hop, then chocolate con churros at dawn." },
+    { category: "beach", name: "San Sebastián & La Concha", city: "San Sebastián", lat: 43.3183, lng: -1.9812, cost: 50, hours: 5, pop: 9.0, desc: "Crescent city beach plus the world's densest cluster of pintxos bars." },
+    { category: "beach", name: "Costa Brava Snorkel", city: "Costa Brava", lat: 41.9, lng: 3.16, cost: 35, hours: 5, pop: 8.5, desc: "Hidden coves and clear Mediterranean water along the Catalan coast." },
+    { category: "hike", name: "Caminito del Rey", city: "Málaga", lat: 36.9136, lng: -4.8056, cost: 18, hours: 4, pop: 8.9, desc: "A boardwalk pinned to a gorge wall 100m above the El Chorro river." },
+    { category: "food", name: "Rioja Wine Country Day", city: "Logroño", lat: 42.4627, lng: -2.445, cost: 85, hours: 6, pop: 8.4, desc: "Bodega tours and tempranillo tastings among the vineyards of La Rioja." },
+    { category: "photography", name: "Ronda Clifftop Town", city: "Ronda", lat: 36.7423, lng: -5.1664, cost: 0, hours: 3, pop: 8.8, desc: "The Puente Nuevo bridge spanning a 120m gorge that splits the white town." },
+    { category: "scenic", name: "Montserrat Monastery", city: "Montserrat", lat: 41.5949, lng: 1.8376, cost: 25, hours: 5, pop: 8.6, desc: "Cable car to a monastery wedged in surreal serrated peaks near Barcelona." },
+  ],
+  events: [
+    { name: "La Tomatina", city: "Valencia", start: "2026-08-26", end: "2026-08-26", cost: 12, source: "eventbrite", desc: "The world's biggest tomato fight in the streets of Buñol near Valencia." },
+    { name: "San Fermín Running of the Bulls", city: "Pamplona", start: "2026-07-06", end: "2026-07-14", cost: 0, source: "tourism-board:navarra", desc: "Nine days of bull-runs, processions, and all-night fiesta in Pamplona." },
+    { name: "Feria de Abril", city: "Seville", start: "2026-04-21", end: "2026-04-26", cost: 0, source: "tourism-board:sevilla", category: "food_festival", desc: "Sevillanas, flamenco dresses, and casetas along the fairground." },
+  ],
+};

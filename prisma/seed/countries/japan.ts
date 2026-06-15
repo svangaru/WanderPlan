@@ -1,0 +1,37 @@
+import type { CountrySeed } from "../lib/types";
+
+export const japan: CountrySeed = {
+  code: "JP",
+  name: "Japan",
+  continent: "Asia",
+  region: "Eastern Asia",
+  currency: "JPY",
+  languages: ["ja"],
+  timezoneOffsets: ["UTC+9"],
+  avgCostPerDayUsd: 120,
+  safetyIndex: 8.8,
+  visaOnArrival: [],
+  bestMonths: [3, 4, 5, 10, 11],
+  experiences: [
+    { category: "cultural", name: "Senso-ji Temple & Asakusa", city: "Tokyo", lat: 35.7148, lng: 139.7967, cost: 0, hours: 2.5, pop: 9.2, desc: "Tokyo's oldest temple, the Kaminarimon gate, and Nakamise snack street." },
+    { category: "city", name: "Shibuya Crossing & Shinjuku", city: "Tokyo", lat: 35.6595, lng: 139.7004, cost: 0, hours: 3, pop: 9.3, desc: "The world's busiest crossing, then neon izakaya alleys of Omoide Yokocho." },
+    { category: "food", name: "Tsukiji Outer Market Tasting", city: "Tokyo", lat: 35.6655, lng: 139.7707, cost: 50, hours: 3, pop: 9.1, desc: "Tamagoyaki, uni, and the freshest sushi breakfast in the old fish market lanes." },
+    { category: "cultural", name: "Fushimi Inari Shrine", city: "Kyoto", lat: 34.9671, lng: 135.7727, cost: 0, hours: 3, pop: 9.6, desc: "Thousands of vermilion torii gates winding up the sacred mountain." },
+    { category: "photography", name: "Arashiyama Bamboo Grove", city: "Kyoto", lat: 35.0095, lng: 135.6669, cost: 0, hours: 2.5, pop: 9.2, desc: "Towering green bamboo corridor, best at first light before the crowds." },
+    { category: "cultural", name: "Kinkaku-ji Golden Pavilion", city: "Kyoto", lat: 35.0394, lng: 135.7292, cost: 5, hours: 1.5, pop: 9.3, desc: "Gold-leaf temple mirrored in its reflecting pond." },
+    { category: "wellness", name: "Hakone Onsen & Lake Ashi", city: "Hakone", lat: 35.2324, lng: 139.1069, cost: 60, hours: 6, pop: 8.9, desc: "Hot-spring soak with Mount Fuji views, plus the pirate-ship lake cruise." },
+    { category: "scenic", name: "Mount Fuji & Chureito Pagoda", city: "Fujiyoshida", lat: 35.4002, lng: 138.8, cost: 0, hours: 4, pop: 9.4, desc: "The classic five-storey pagoda framing Fuji, sublime in cherry season." },
+    { category: "cultural", name: "Itsukushima Floating Torii", city: "Hiroshima", lat: 34.2959, lng: 132.3197, cost: 8, hours: 4, pop: 9.0, desc: "The great torii of Miyajima standing in the sea at high tide." },
+    { category: "cultural", name: "Hiroshima Peace Memorial", city: "Hiroshima", lat: 34.3955, lng: 132.4536, cost: 2, hours: 2.5, pop: 9.1, desc: "The A-Bomb Dome and museum at the hypocentre of 1945." },
+    { category: "city", name: "Dotonbori Street Food", city: "Osaka", lat: 34.6687, lng: 135.5031, cost: 35, hours: 3, pop: 9.0, desc: "Takoyaki and okonomiyaki under the Glico sign on Osaka's neon canal." },
+    { category: "nature", name: "Nara Deer Park & Todai-ji", city: "Nara", lat: 34.685, lng: 135.8398, cost: 6, hours: 4, pop: 8.9, desc: "Bowing sika deer and the Great Buddha in the world's largest wooden hall." },
+    { category: "skiing", name: "Niseko Powder Day", city: "Niseko", lat: 42.8048, lng: 140.6874, cost: 70, hours: 7, pop: 8.7, desc: "Legendary dry powder on Hokkaido's slopes, with onsen après-ski." },
+    { category: "food", name: "Kaiseki Dinner", city: "Kyoto", lat: 35.0036, lng: 135.7681, cost: 130, hours: 2.5, pop: 8.6, desc: "A multi-course seasonal tasting menu, Japan's haute cuisine." },
+    { category: "nightlife", name: "Golden Gai Bar Hop", city: "Tokyo", lat: 35.6938, lng: 139.7045, cost: 45, hours: 3, pop: 8.4, desc: "Tiny six-seat bars stacked in a warren of post-war Shinjuku lanes." },
+  ],
+  events: [
+    { name: "Cherry Blossom Season", city: "Tokyo", start: "2026-03-25", end: "2026-04-07", cost: 0, source: "tourism-board:japan", desc: "Hanami picnics under sakura in Ueno and along the Meguro River." },
+    { name: "Gion Matsuri", city: "Kyoto", start: "2026-07-17", end: "2026-07-24", cost: 0, source: "tourism-board:kyoto", desc: "Towering float processions in Kyoto's grandest summer festival." },
+    { name: "Sapporo Snow Festival", city: "Sapporo", start: "2026-02-04", end: "2026-02-11", cost: 0, source: "eventbrite", desc: "Giant ice and snow sculptures across Odori Park." },
+  ],
+};

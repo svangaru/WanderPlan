@@ -29,7 +29,13 @@ export function ItineraryView({
   engineModel: string;
   events: EventContext[];
   cityCoords: Record<string, { lat: number; lng: number }>;
-  headline: { start: string; end: string; groupSize: number };
+  headline: {
+    start: string;
+    end: string;
+    groupSize: number;
+    countryName: string;
+    countryCode: string;
+  };
 }) {
   const router = useRouter();
   const { show, toast } = useToast();
@@ -40,6 +46,9 @@ export function ItineraryView({
   const [regenDay, setRegenDay] = useState<number | null>(null);
 
   const total = days.reduce((s, d) => s + (d.daily_total_cost_usd || 0), 0);
+  // The SVG route map is Italy-only; other countries use day view until the
+  // Phase C Mapbox view lands.
+  const showMap = headline.countryCode === "IT";
 
   const toggleLock = (dayNumber: number) => {
     setLocks((prev) => {
@@ -93,7 +102,7 @@ export function ItineraryView({
       </div>
 
       <div className="mb-5">
-        <h2 className="wp-display text-3xl text-white">Italy, your way</h2>
+        <h2 className="wp-display text-3xl text-white">{headline.countryName}, your way</h2>
         <p className="mt-1 text-sm text-slate-400">
           {formatDate(headline.start)} → {formatDate(headline.end)} · {days.length} days ·{" "}
           {headline.groupSize} traveler{headline.groupSize > 1 ? "s" : ""} · est.{" "}
@@ -127,26 +136,30 @@ export function ItineraryView({
         </div>
       )}
 
-      <div
-        className="mb-5 flex w-fit gap-1 rounded-full border border-slate-800 p-1"
-        style={{ background: "rgba(10,15,30,0.8)" }}
-      >
-        {([
-          ["days", "📋 Day view"],
-          ["map", "🗺️ Map view"],
-        ] as const).map(([v, label]) => (
-          <button
-            key={v}
-            onClick={() => setView(v)}
-            className="rounded-full px-4 py-1.5 text-xs font-medium transition-all"
-            style={view === v ? { background: "#00E5C3", color: "#06281f" } : { color: "#94a3b8" }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
+      {showMap && (
+        <div
+          className="mb-5 flex w-fit gap-1 rounded-full border border-slate-800 p-1"
+          style={{ background: "rgba(10,15,30,0.8)" }}
+        >
+          {([
+            ["days", "📋 Day view"],
+            ["map", "🗺️ Map view"],
+          ] as const).map(([v, label]) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className="rounded-full px-4 py-1.5 text-xs font-medium transition-all"
+              style={view === v ? { background: "#00E5C3", color: "#06281f" } : { color: "#94a3b8" }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {view === "days" ? (
+      {showMap && view === "map" ? (
+        <ItalyMap days={days} cityCoords={cityCoords} />
+      ) : (
         <div className="space-y-4 pb-10">
           {days.map((d) => (
             <DayCard
@@ -159,8 +172,6 @@ export function ItineraryView({
             />
           ))}
         </div>
-      ) : (
-        <ItalyMap days={days} cityCoords={cityCoords} />
       )}
       {toast}
     </div>

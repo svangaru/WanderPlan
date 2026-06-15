@@ -4,6 +4,7 @@ import { loadOwnedTrip } from "@/lib/api/trips";
 import { loadActiveItinerary } from "@/lib/itinerary/persist";
 import { assembleGroundingContext } from "@/lib/itinerary/grounding";
 import { dbToTripInput } from "@/lib/trip-mapping";
+import { countryFlavor } from "@/lib/constants";
 import { ItineraryView } from "@/components/itinerary/ItineraryView";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,9 @@ export default async function TripPage({ params }: { params: { id: string } }) {
     if (!(e.city in cityCoords)) cityCoords[e.city] = { lat: e.lat, lng: e.lng };
   }
 
+  const primaryCode = tripInput.countries[0] ?? "IT";
+  const flavor = countryFlavor(primaryCode);
+
   return (
     <main className="flex min-h-screen flex-col">
       <header className="mx-auto flex w-full max-w-2xl items-center justify-between px-5 pt-4">
@@ -47,6 +51,8 @@ export default async function TripPage({ params }: { params: { id: string } }) {
           start: tripInput.startDate,
           end: tripInput.endDate,
           groupSize: tripInput.groupSize,
+          countryName: flavor.name,
+          countryCode: primaryCode,
         }}
       />
     </main>

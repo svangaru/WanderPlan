@@ -32,8 +32,12 @@ model Country {
   @@map("countries")
 }
 
+// Partitioned by LIST (countryId) via a raw SQL migration — Prisma can't declare
+// PostgreSQL partitions, so the partition DDL lives in the migration and this
+// model is mapped to the resulting table. The composite primary key is required
+// because a partitioned table's PK must include the partition key.
 model CountryExperience {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id               String   @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   countryId        String   @db.Uuid
   category         String   @db.VarChar(50)
   name             String   @db.VarChar(200)
@@ -51,8 +55,8 @@ model CountryExperience {
   createdAt        DateTime @default(now())
 
   country        Country      @relation(fields: [countryId], references: [id], onDelete: Cascade)
-  itineraryDayExperiences ItineraryDayExperience[]
 
+  @@id([id, countryId])
   @@index([countryId])
   @@index([locationCity])
   @@map("country_experiences")
@@ -278,13 +282,15 @@ model ItineraryDay {
   @@map("itinerary_days")
 }
 
+// experienceId references the partitioned country_experiences table at the
+// application level only — Postgres can't FK to a single column of a composite
+// PK, so the DB-level FK is intentionally dropped (see partition migration).
 model ItineraryDayExperience {
   id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   itineraryDayId    String   @db.Uuid
   experienceId      String   @db.Uuid
 
-  itineraryDay ItineraryDay      @relation(fields: [itineraryDayId], references: [id], onDelete: Cascade)
-  experience   CountryExperience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+  itineraryDay ItineraryDay @relation(fields: [itineraryDayId], references: [id], onDelete: Cascade)
 
   @@unique([itineraryDayId, experienceId])
   @@index([itineraryDayId])

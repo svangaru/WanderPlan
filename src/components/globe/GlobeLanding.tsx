@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import * as THREE from "three";
 import { GLOBE_COUNTRIES, MAX_COUNTRIES_PER_TRIP } from "@/lib/constants";
 import { useToast } from "@/components/ui/Toast";
+import { LaunchTransition } from "@/components/globe/LaunchTransition";
 
 // react-globe.gl touches `window`, so it must load client-only.
 const Globe = dynamic(() => import("react-globe.gl"), { ssr: false });
@@ -24,6 +25,7 @@ export function GlobeLanding() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [selected, setSelected] = useState<string[]>([]);
+  const [launching, setLaunching] = useState(false);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -57,9 +59,15 @@ export function GlobeLanding() {
     else show(`${c.name} — coming in Phase 2. Italy is live!`);
   };
 
+  const destinationLabel = selected
+    .map((code) => GLOBE_COUNTRIES.find((g) => g.code === code)?.name ?? code)
+    .join(" · ");
+
   const plan = () => {
-    if (!selected.length) return;
-    router.push(`/plan?countries=${selected.join(",")}`);
+    if (!selected.length || launching) return;
+    setLaunching(true);
+    // Let the warp transition play before routing to the wizard.
+    setTimeout(() => router.push(`/plan?countries=${selected.join(",")}`), 1150);
   };
 
   return (
@@ -145,6 +153,7 @@ export function GlobeLanding() {
         </button>
       </div>
       {toast}
+      {launching && <LaunchTransition destinationLabel={destinationLabel} />}
     </div>
   );
 }

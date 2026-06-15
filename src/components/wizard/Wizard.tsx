@@ -8,6 +8,7 @@ import {
   DEFAULT_PREFS,
   GROUP_TYPES,
   DIETARY_OPTIONS,
+  countryFlavor,
 } from "@/lib/constants";
 import { formatDate, daysBetween } from "@/lib/dates";
 import type { Preferences, TripInput, GenerationEngine } from "@/lib/types";
@@ -25,7 +26,7 @@ import { useToast } from "@/components/ui/Toast";
 
 const STEPS = ["Dates & Route", "Travelers", "Preferences", "Budget", "Review"];
 const STEP_BLURBS = [
-  "Italy · when and where does it start?",
+  "when and where does it start?",
   "Who's coming?",
   "Slide what matters to you — this drives the AI.",
   "What's the daily damage you're comfortable with?",
@@ -88,6 +89,7 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
     if (hydrated) saveWizardState({ trip, prefs, step });
   }, [hydrated, trip, prefs, step]);
 
+  const flavor = countryFlavor(trip.countries[0] ?? "IT");
   const totalDays = daysBetween(trip.startDate, trip.endDate);
   const stepValid = [
     totalDays >= 3 && totalDays <= 365 && trip.startCity.trim().length > 0,
@@ -172,7 +174,15 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
   };
 
   if (generating) {
-    return <GeneratingScreen progress={genProgress} phase={genPhase} engine={engine} />;
+    return (
+      <GeneratingScreen
+        progress={genProgress}
+        phase={genPhase}
+        engine={engine}
+        countryName={flavor.name}
+        flag={flavor.flag}
+      />
+    );
   }
 
   return (
@@ -197,7 +207,9 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
       </div>
 
       <h2 className="wp-display mb-1 text-2xl text-white">{STEPS[step]}</h2>
-      <p className="mb-5 text-sm text-slate-500">{STEP_BLURBS[step]}</p>
+      <p className="mb-5 text-sm text-slate-500">
+        {step === 0 ? `${flavor.name} · ${STEP_BLURBS[0]}` : STEP_BLURBS[step]}
+      </p>
 
       {step === 0 && (
         <div className="space-y-4">
@@ -397,7 +409,7 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
       {step === 4 && (
         <div className="space-y-3">
           <div className="space-y-2 rounded-xl border border-slate-700 bg-slate-900/50 p-4 text-sm">
-            <Row k="Country" v="🇮🇹 Italy" />
+            <Row k="Country" v={`${flavor.flag} ${flavor.name}`} />
             <Row
               k="Dates"
               v={`${formatDate(trip.startDate)} → ${formatDate(trip.endDate)} (${totalDays} days)`}

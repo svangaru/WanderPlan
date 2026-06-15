@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { toIsoDate } from "@/lib/dates";
+import { codeForCountryName } from "@/lib/constants";
 import type { Itinerary, ItineraryDay } from "@/lib/itinerary/schema";
 import type { EventContext, ExperienceContext } from "@/lib/types";
 
@@ -86,9 +87,8 @@ function collectExperienceIds(day: ItineraryDay, byName: Map<string, string>): s
   return [...ids];
 }
 
-const COUNTRY_NAME_TO_CODE: Record<string, string> = { Italy: "IT" };
 function countryCodeFor(name: string): string {
-  return COUNTRY_NAME_TO_CODE[name] ?? name.slice(0, 2).toUpperCase();
+  return codeForCountryName(name);
 }
 
 /** Replaces a single day (by dayNumber) within an active itinerary in place. */

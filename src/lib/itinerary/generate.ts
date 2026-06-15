@@ -47,11 +47,11 @@ export async function generateItinerary(
   onText?: (delta: string) => void,
 ): Promise<GenerateResult> {
   const totalDays = daysBetween(ctx.trip.startDate, ctx.trip.endDate);
-  const country = ctx.trip.countries[0] ?? "Italy";
+  const countryCode = ctx.trip.countries[0] ?? "IT";
   const engine = resolveEngine(requested, totalDays);
 
   const mockResult = (fallbackReason?: string): GenerateResult => ({
-    itinerary: mockGenerate(ctx, experiences, events, country),
+    itinerary: mockGenerate(ctx, experiences, events, countryCode),
     engine: "mock",
     usage: { inputTokens: 0, outputTokens: 0 },
     rawPrompt: "",

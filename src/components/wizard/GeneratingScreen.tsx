@@ -7,10 +7,14 @@ export function GeneratingScreen({
   progress,
   phase,
   engine,
+  countryName,
+  flag,
 }: {
   progress: number;
   phase: string;
   engine: GenerationEngine;
+  countryName: string;
+  flag: string;
 }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
@@ -24,9 +28,9 @@ export function GeneratingScreen({
           className="absolute inset-3 rounded-full"
           style={{ background: "radial-gradient(circle at 35% 35%, #16294a, #0a0f1e)" }}
         />
-        <span className="absolute inset-0 flex items-center justify-center text-xl">🇮🇹</span>
+        <span className="absolute inset-0 flex items-center justify-center text-xl">{flag}</span>
       </div>
-      <h3 className="wp-display mb-2 text-2xl text-white">Building your Italy</h3>
+      <h3 className="wp-display mb-2 text-2xl text-white">Building your {countryName}</h3>
       <p className="h-5 text-sm text-slate-400 transition-all">{phase}</p>
       <div className="mt-6 h-1.5 w-64 overflow-hidden rounded-full bg-slate-800">
         <div

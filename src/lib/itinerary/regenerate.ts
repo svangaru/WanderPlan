@@ -39,7 +39,7 @@ export async function regenerateDay(params: {
       { trip: ctx.trip, prefs: { ...ctx.prefs, food: Math.min(100, ctx.prefs.food + 10) } },
       experiences,
       events,
-      ctx.trip.countries[0] ?? "Italy",
+      ctx.trip.countries[0] ?? "IT",
     );
     const candidate =
       alt.find((d) => d.city === target.city && d.morning.activity !== target.morning.activity) ??

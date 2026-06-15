@@ -1,4 +1,5 @@
 import { addDays, daysBetween } from "@/lib/dates";
+import { countryFlavor } from "@/lib/constants";
 import type {
   GenerationContext,
   ExperienceContext,
@@ -22,6 +23,7 @@ export function buildItineraryPrompt(
   const dayEnd = opts.dayEnd ?? totalDays;
   const count = dayEnd - dayStart + 1;
   const startDateForRange = addDays(trip.startDate, dayStart - 1);
+  const countryNames = trip.countries.map((c) => countryFlavor(c).name).join(", ") || "Italy";
 
   const dbCtx = experiences.map((e) => ({
     name: e.name,
@@ -39,7 +41,7 @@ export function buildItineraryPrompt(
     cost: e.cost_usd,
   }));
 
-  return `You are WanderPlan's expert travel curator. Generate ${count === totalDays ? `a ${totalDays}-day` : `days ${dayStart}–${dayEnd} of a ${totalDays}-day`} ${trip.countries.join(", ") || "Italy"} itinerary.
+  return `You are WanderPlan's expert travel curator. Generate ${count === totalDays ? `a ${totalDays}-day` : `days ${dayStart}–${dayEnd} of a ${totalDays}-day`} ${countryNames} itinerary.
 
 TRIP: ${trip.startDate} to ${trip.endDate}. Start city: ${trip.startCity || "Rome"}. End city: ${trip.returnTrip ? trip.startCity || "Rome" : trip.endCity || trip.startCity || "Rome"}. Group: ${trip.groupSize} (${trip.groupType}). Budget/day/person: $${trip.budget}.
 DIETARY: ${trip.dietary.join(", ") || "none"}. MOBILITY NEEDS: ${trip.mobility ? "yes — avoid strenuous hikes/stairs" : "no"}.

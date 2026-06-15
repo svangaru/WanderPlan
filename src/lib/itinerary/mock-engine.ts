@@ -1,5 +1,5 @@
 import { addDays, daysBetween, dateOverlaps } from "@/lib/dates";
-import { CATEGORY_TO_PREF } from "@/lib/constants";
+import { CATEGORY_TO_PREF, countryFlavor } from "@/lib/constants";
 import type {
   GenerationContext,
   ExperienceContext,
@@ -16,15 +16,6 @@ import type { Itinerary, ItineraryDay } from "@/lib/itinerary/schema";
 
 const EVENING_CATEGORIES = ["nightlife", "music", "concert", "food", "food_festival"];
 
-const LOCAL_TIPS = [
-  "Cappuccino is a before-11am drink — order espresso after meals.",
-  "Validate regional train tickets in the green machines before boarding.",
-  "Museums are free the first Sunday of each month.",
-  "Riposo: many shops close 1–4pm — plan lunches long.",
-  "Tap water from nasoni fountains is excellent and free.",
-  "Dinner before 7:30pm marks you as a tourist — book 8:30+.",
-];
-
 interface ScoredExperience extends ExperienceContext {
   score: number;
 }
@@ -33,9 +24,10 @@ export function mockGenerate(
   ctx: GenerationContext,
   experiences: ExperienceContext[],
   events: EventContext[],
-  country = "Italy",
+  countryCode = "IT",
 ): Itinerary {
   const { trip, prefs } = ctx;
+  const flavor = countryFlavor(countryCode);
   const totalDays = daysBetween(trip.startDate, trip.endDate);
   if (experiences.length === 0) return [];
 
@@ -106,11 +98,10 @@ export function mockGenerate(
       const transport =
         i === 0 && ci > 0
           ? {
-              mode: "train",
+              mode: flavor.transportMode,
               duration: "1.5–3h",
               cost_usd: Math.round(35 * costMult),
-              booking_note:
-                "Trenitalia / Italo — book Frecciarossa 1–2 weeks ahead for best fares.",
+              booking_note: flavor.transportNote,
             }
           : null;
 
@@ -128,7 +119,7 @@ export function mockGenerate(
       days.push({
         day_number: dayNum,
         date,
-        country,
+        country: flavor.name,
         city: a.city,
         day_theme: `${morning.category === "hike" ? "Trails & " : ""}${a.city} — ${morning.name
           .split(" ")
@@ -159,13 +150,13 @@ export function mockGenerate(
         accommodation: {
           type: accomType,
           name: `${a.city} ${accomType === "airbnb" ? "apartment" : accomType}`,
-          area: "old town / centro storico",
+          area: flavor.accomArea,
           est_cost_per_night_usd: Math.round(accomBase * costMult),
         },
         daily_total_cost_usd: Math.round(
           slotCost(morning) + slotCost(afternoon) + eveningCost + accomBase * costMult + 45 * costMult,
         ),
-        local_tip: LOCAL_TIPS[dayNum % LOCAL_TIPS.length],
+        local_tip: flavor.localTips[dayNum % flavor.localTips.length],
         event_highlight: ev ? { name: ev.name, url: ev.url, source: ev.source } : null,
       });
       dayNum++;

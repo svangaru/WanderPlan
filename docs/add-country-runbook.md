@@ -1,85 +1,69 @@
-# Add a New Country — Runbook (Phase C)
+# Add a New Country — Runbook
 
-This document describes how to add a new country to WanderPlan after Phase A (Italy MVP).
+This document describes how to add a new country to WanderPlan.
 
 ## Overview
 
-Phase A ships with Italy only. The schema supports multi-country via:
-- Partitioned `country_experiences` table (by country_id)
-- Globe visual ready for all countries
-- Trip preferences/routing logic country-agnostic
+The 10 most-visited countries are live (Italy, France, Spain, US, Türkiye,
+Mexico, Japan, Greece, Thailand, Portugal). The architecture already supports
+multi-country:
+- `country_experiences` is **LIST-partitioned by `countryId`** (one partition per
+  country, plus a `DEFAULT` safety-net partition). The partitioned DDL lives in
+  `prisma/migrations/20260616120000_partition_country_experiences/`.
+- The seed creates each country's partition automatically — no migration needed
+  to add a country anymore.
+- Globe, wizard, mock-engine flavor, and the itinerary view are country-aware via
+  `COUNTRY_FLAVOR` in `src/lib/constants.ts`.
 
-To add a new country, follow this runbook.
+## Step 1: Add the country data file
 
-## Step 1: Seed Country Data
-
-### 1a. Create a migration to add partitioning for the new country
-
-If this is the **first new country after Italy**, you must implement LIST partitioning on `country_experiences`:
-
-```bash
-pnpm prisma migrate create_migration --name partition_country_experiences
-```
-
-In the migration SQL file, replace the entire `country_experiences` table with a partitioned version:
-
-```sql
--- Step 1: Drop dependent tables
-DROP TABLE IF EXISTS itinerary_day_events;
-DROP TABLE IF EXISTS itinerary_day_experiences;
-DROP TABLE IF EXISTS country_experiences;
-
--- Step 2: Create partitioned table
-CREATE TABLE country_experiences (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  country_id uuid NOT NULL REFERENCES countries(id) ON DELETE CASCADE,
-  -- ... all other columns ...
-) PARTITION BY LIST (country_id);
-
--- Step 3: Create partition for Italy (if not already present)
-CREATE TABLE country_experiences_it PARTITION OF country_experiences
-  FOR VALUES IN ('{italy_country_id}');
-
--- Step 4: Create partition for new country
-CREATE TABLE country_experiences_xx PARTITION OF country_experiences
-  FOR VALUES IN ('{new_country_id}');
-
--- Step 5: Recreate dependent tables
-CREATE TABLE itinerary_day_experiences ( ... );
-CREATE TABLE itinerary_day_events ( ... );
-```
-
-### 1b. Add country to seed script (or create new seed file)
-
-Edit `prisma/seed/index.ts` or create `prisma/seed/countries/{code}.ts`:
+Create `prisma/seed/countries/{name}.ts` exporting a `CountrySeed` (see the
+`CountrySeed` type in `prisma/seed/lib/types.ts`). Costs/coords are plain numbers.
 
 ```typescript
-// prisma/seed/countries/france.ts
-export const france = {
-  code: "FR",
-  name: "France",
+// prisma/seed/countries/croatia.ts
+import type { CountrySeed } from "../lib/types";
+
+export const croatia: CountrySeed = {
+  code: "HR",
+  name: "Croatia",
   continent: "Europe",
-  region: "Western Europe",
+  region: "Southern Europe",
   currency: "EUR",
-  languages: ["fr", "en"],
+  languages: ["hr", "en"],
   timezoneOffsets: ["UTC+1", "UTC+2"],
-  avgCostPerDayUsd: new Prisma.Decimal("95"),
-  safetyIndex: new Prisma.Decimal("7.6"),
+  avgCostPerDayUsd: 70,
+  safetyIndex: 8.0,
   visaOnArrival: [],
   bestMonths: [5, 6, 9, 10],
+  experiences: [
+    // 15-20 real experiences with lat/lng, cost, hours, popularity, description
+  ],
+  events: [
+    // a few seasonal live events (optional)
+  ],
 };
-
-export const franceExperiences = [
-  // 20+ experiences with lat/lng, cost, popularity, description
-  // Source: manual research, tourism boards, user feedback
-];
-
-export const franceLiveEvents = [
-  // 6+ seasonal events (Cannes, Paris Fashion Week, etc.)
-];
 ```
 
-Run: `pnpm db:seed`
+Then register it in `prisma/seed/countries/index.ts`:
+
+```typescript
+import { croatia } from "./croatia";
+export const countrySeeds: CountrySeed[] = [/* …existing… */, croatia];
+```
+
+Run `pnpm db:seed`. The seed upserts the country, **creates its partition**
+(`country_experiences_hr`) automatically, and loads its experiences/events.
+
+## Step 2: Add country-aware flavor + globe entry
+
+In `src/lib/constants.ts`:
+- Add a `COUNTRY_FLAVOR["HR"]` entry (name, flag, transport mode/note, accom area,
+  local tips) so the mock engine and UI aren't generic for it.
+- In `GLOBE_COUNTRIES`, set the country's `active: true` (or add it if missing).
+
+That's it for enabling — generation, persistence, and the itinerary view all key
+off the country code.
 
 ## Step 2: Scraper Setup (Phase C+)
 

@@ -1,0 +1,299 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Country {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                String    @unique @db.Char(2)
+  name                String    @db.VarChar(100)
+  continent           String    @db.VarChar(50)
+  region              String    @db.VarChar(100)
+  currency            String    @db.VarChar(10)
+  languages           String[]  @db.Text
+  timezoneOffsets     Json
+  avgCostPerDayUsd    Decimal   @db.Decimal(8, 2)
+  safetyIndex         Decimal   @db.Decimal(4, 2)
+  visaOnArrival       String[]  @db.Text
+  bestMonths          Int[]
+  createdAt           DateTime  @default(now())
+
+  experiences    CountryExperience[]
+  liveEvents     LiveEvent[]
+  accommodations Accommodation[]
+
+  @@map("countries")
+}
+
+model CountryExperience {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  countryId        String   @db.Uuid
+  category         String   @db.VarChar(50)
+  name             String   @db.VarChar(200)
+  description      String   @db.Text
+  locationCity     String   @db.VarChar(100)
+  locationLat      Decimal  @db.Decimal(9, 6)
+  locationLng      Decimal  @db.Decimal(9, 6)
+  avgCostUsd       Decimal  @db.Decimal(8, 2)
+  durationHours    Decimal  @db.Decimal(4, 1)
+  bestSeason       String[] @db.Text
+  accessibility    Decimal  @db.Decimal(4, 2)
+  popularityScore  Decimal  @db.Decimal(4, 2)
+  sourceUrl        String?  @db.Text
+  lastVerified     DateTime?
+  createdAt        DateTime @default(now())
+
+  country        Country      @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  itineraryDayExperiences ItineraryDayExperience[]
+
+  @@index([countryId])
+  @@index([locationCity])
+  @@map("country_experiences")
+}
+
+model LiveEvent {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  countryId        String   @db.Uuid
+  city             String   @db.VarChar(100)
+  name             String   @db.VarChar(200)
+  category         String   @db.VarChar(50)
+  startDate        DateTime @db.Date
+  endDate          DateTime @db.Date
+  description      String?  @db.Text
+  ticketUrl        String?  @db.Text
+  estimatedCostUsd Decimal? @db.Decimal(8, 2)
+  source           String   @db.VarChar(100)
+  scrapedAt        DateTime @default(now())
+  isVerified       Boolean  @default(false)
+
+  country        Country      @relation(fields: [countryId], references: [id], onDelete: Cascade)
+  itineraryDayEvents ItineraryDayEvent[]
+
+  @@index([countryId])
+  @@index([startDate, endDate])
+  @@index([city])
+  @@map("live_events")
+}
+
+model User {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email            String   @unique
+  displayName      String?  @db.VarChar(100)
+  avatarUrl        String?  @db.Text
+  homeCountry      String?  @db.Char(2)
+  passportCountry  String?  @db.Char(2)
+  preferredCurrency String? @db.VarChar(10)
+  createdAt        DateTime @default(now())
+  lastLogin        DateTime?
+  emailVerified    DateTime?
+
+  accounts         Account[]
+  sessions         Session[]
+  trips            Trip[]
+  collaborations   TripCollaborator[]
+
+  @@map("users")
+}
+
+model Account {
+  id                 String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String  @db.Uuid
+  type               String
+  provider           String
+  providerAccountId  String
+  refreshToken       String? @db.Text
+  accessToken        String? @db.Text
+  expiresAt          Int?
+  tokenType          String?
+  scope              String?
+  idToken            String? @db.Text
+  sessionState       String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionToken String   @unique
+  userId       String   @db.Uuid
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model Trip {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  createdBy       String   @db.Uuid
+  tripName        String   @db.VarChar(200)
+  startDate       DateTime @db.Date
+  endDate         DateTime @db.Date
+  startCity       String   @db.VarChar(100)
+  startCountry    String   @db.Char(2)
+  endCity         String   @db.VarChar(100)
+  endCountry      String   @db.Char(2)
+  countries       String[] @db.Char(2)
+  status          String   @default("draft") // draft, planning, confirmed, completed
+  isCollaborative Boolean  @default(false)
+  shareToken      String?  @db.Uuid
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  creator       User                @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  preferences   TripPreference?
+  itineraries   Itinerary[]
+  collaborators TripCollaborator[]
+
+  @@index([createdBy])
+  @@map("trips")
+}
+
+model TripPreference {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tripId             String   @unique @db.Uuid
+  prefFood           Int      @default(50)
+  prefNature         Int      @default(50)
+  prefCity           Int      @default(50)
+  prefMusic          Int      @default(50)
+  prefBeach          Int      @default(50)
+  prefCulture        Int      @default(50)
+  prefAdventure      Int      @default(50)
+  prefNightlife      Int      @default(50)
+  prefWellness       Int      @default(50)
+  prefWildlife       Int      @default(50)
+  prefPhotography    Int      @default(50)
+  prefMinimizeCost   Int      @default(50)
+  prefMinimizeFlights Int     @default(50)
+  prefMaximizeLocal  Int      @default(50)
+  prefPace           Int      @default(50)
+  budgetPerDayUsd    Decimal? @db.Decimal(8, 2)
+  travelStyle        String?  // backpacker, mid-range, luxury
+  groupSize          Int      @default(1)
+  hasKids            Boolean  @default(false)
+  mobilityNeeds      Boolean  @default(false)
+  dietaryRestrictions String[] @db.Text
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@map("trip_preferences")
+}
+
+model TripCollaborator {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tripId    String   @db.Uuid
+  userId    String   @db.Uuid
+  role      String   // owner, editor, viewer
+  joinedAt  DateTime @default(now())
+
+  trip Trip @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tripId, userId])
+  @@index([tripId])
+  @@index([userId])
+  @@map("trip_collaborators")
+}
+
+model Itinerary {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tripId       String   @db.Uuid
+  generatedAt  DateTime @default(now())
+  modelVersion String   @db.VarChar(50)
+  rawPrompt    String   @db.Text
+  rawResponse  String   @db.Text
+  isActive     Boolean  @default(true)
+
+  trip Trip             @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  days ItineraryDay[]
+
+  @@index([tripId])
+  @@map("itineraries")
+}
+
+model ItineraryDay {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  itineraryId          String   @db.Uuid
+  dayNumber            Int
+  date                 DateTime @db.Date
+  countryCode          String   @db.Char(2)
+  city                 String   @db.VarChar(100)
+  dayTheme             String   @db.VarChar(200)
+  morningActivity      String   @db.Text
+  afternoonActivity    String   @db.Text
+  eveningActivity      String   @db.Text
+  accommodationType    String?  @db.VarChar(100)
+  accommodationNotes   String?  @db.Text
+  transportFromPrev    String?  @db.Text
+  estimatedCostUsd     Decimal? @db.Decimal(8, 2)
+  weatherNote          String?  @db.Text
+  tips                 String[] @db.Text
+  isLocked             Boolean  @default(false)
+
+  itinerary          Itinerary                 @relation(fields: [itineraryId], references: [id], onDelete: Cascade)
+  experiences        ItineraryDayExperience[]
+  events             ItineraryDayEvent[]
+
+  @@index([itineraryId])
+  @@index([date])
+  @@map("itinerary_days")
+}
+
+model ItineraryDayExperience {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  itineraryDayId    String   @db.Uuid
+  experienceId      String   @db.Uuid
+
+  itineraryDay ItineraryDay      @relation(fields: [itineraryDayId], references: [id], onDelete: Cascade)
+  experience   CountryExperience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  @@unique([itineraryDayId, experienceId])
+  @@index([itineraryDayId])
+  @@index([experienceId])
+  @@map("itinerary_day_experiences")
+}
+
+model ItineraryDayEvent {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  itineraryDayId String   @db.Uuid
+  eventId        String   @db.Uuid
+
+  itineraryDay ItineraryDay @relation(fields: [itineraryDayId], references: [id], onDelete: Cascade)
+  event        LiveEvent    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([itineraryDayId, eventId])
+  @@index([itineraryDayId])
+  @@index([eventId])
+  @@map("itinerary_day_events")
+}
+
+model Accommodation {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  countryId       String   @db.Uuid
+  city            String   @db.VarChar(100)
+  name            String   @db.VarChar(200)
+  type            String   @db.VarChar(50) // hotel, hostel, airbnb, resort, guesthouse, camping
+  pricePerNightUsd Decimal @db.Decimal(8, 2)
+  rating          Decimal? @db.Decimal(3, 2)
+  lat             Decimal  @db.Decimal(9, 6)
+  lng             Decimal  @db.Decimal(9, 6)
+  bookingUrl      String?  @db.Text
+  airbnbListingId String?  @db.VarChar(50)
+  hotelId         String?  @db.VarChar(50)
+  amenities       String[] @db.Text
+
+  country Country @relation(fields: [countryId], references: [id], onDelete: Cascade)
+
+  @@index([countryId])
+  @@index([city])
+  @@map("accommodations")
+}

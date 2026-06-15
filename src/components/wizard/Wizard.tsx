@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSession, signIn } from "next-auth/react";
 import {
@@ -12,6 +12,12 @@ import {
 import { formatDate, daysBetween } from "@/lib/dates";
 import type { Preferences, TripInput, GenerationEngine } from "@/lib/types";
 import { streamPost } from "@/lib/sse-client";
+import {
+  loadWizardState,
+  saveWizardState,
+  setResumeGeneration,
+  consumeResumeGeneration,
+} from "@/lib/wizard-storage";
 import { PrefSlider } from "@/components/wizard/PrefSlider";
 import { GeneratingScreen } from "@/components/wizard/GeneratingScreen";
 import { MiniGlobe } from "@/components/ui/MiniGlobe";
@@ -45,7 +51,10 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
   const [genProgress, setGenProgress] = useState(0);
   const [genPhase, setGenPhase] = useState("");
   const [engine, setEngine] = useState<GenerationEngine>("live");
-  const pendingGen = useRef(false);
+  // Gates persistence + resume on client-side rehydration to avoid an SSR
+  // hydration mismatch (server has no sessionStorage).
+  const [hydrated, setHydrated] = useState(false);
+  const [resumePending, setResumePending] = useState(false);
 
   const [trip, setTrip] = useState<TripInput>({
     startDate: "2026-06-20",
@@ -61,6 +70,23 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
     countries: initialCountries.length ? initialCountries : ["IT"],
   });
   const [prefs, setPrefs] = useState<Preferences>({ ...DEFAULT_PREFS });
+
+  // After mount, rehydrate any saved wizard state and resume intent.
+  useEffect(() => {
+    const savedState = loadWizardState();
+    if (savedState) {
+      setTrip(savedState.trip);
+      setPrefs(savedState.prefs);
+      setStep(savedState.step);
+    }
+    if (consumeResumeGeneration()) setResumePending(true);
+    setHydrated(true);
+  }, []);
+
+  // Keep sessionStorage in sync (only after rehydration, so we never clobber it).
+  useEffect(() => {
+    if (hydrated) saveWizardState({ trip, prefs, step });
+  }, [hydrated, trip, prefs, step]);
 
   const totalDays = daysBetween(trip.startDate, trip.endDate);
   const stepValid = [
@@ -123,18 +149,23 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
     }
   }, [persistDraft, router, show]);
 
-  // Resume generation after a sign-in round-trip.
+  // Resume generation after a sign-in round-trip, once state is rehydrated and
+  // the session is authenticated. runGeneration is in deps, so it re-fires with
+  // the rehydrated trip/prefs rather than the defaults.
   useEffect(() => {
-    if (status === "authenticated" && pendingGen.current) {
-      pendingGen.current = false;
+    if (hydrated && resumePending && status === "authenticated") {
+      setResumePending(false);
       void runGeneration();
     }
-  }, [status, runGeneration]);
+  }, [hydrated, resumePending, status, runGeneration]);
 
   const onGenerate = () => {
     if (status !== "authenticated") {
-      pendingGen.current = true;
-      signIn("google");
+      // Persist intent + state, then return to this exact wizard after auth.
+      setResumeGeneration();
+      saveWizardState({ trip, prefs, step });
+      const callbackUrl = `/plan?countries=${trip.countries.join(",")}`;
+      signIn("google", { callbackUrl });
       return;
     }
     void runGeneration();

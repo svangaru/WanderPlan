@@ -14,14 +14,25 @@ const slotSchema = z.object({
   tips: z.string().default(""),
 });
 
-const transportSchema = z
-  .object({
-    mode: z.string(),
-    duration: z.string(),
-    cost_usd: z.number().nonnegative(),
-    booking_note: z.string().default(""),
-  })
-  .nullable();
+// The model often emits an empty/partial object instead of null on days with no
+// inter-city travel. Coerce anything without a real `mode` to null so a "no
+// transport" day validates cleanly.
+const transportSchema = z.preprocess(
+  (v) => {
+    if (!v || typeof v !== "object") return null;
+    const o = v as Record<string, unknown>;
+    if (typeof o.mode !== "string" || o.mode.trim() === "") return null;
+    return o;
+  },
+  z
+    .object({
+      mode: z.string(),
+      duration: z.string().default(""),
+      cost_usd: z.number().nonnegative().default(0),
+      booking_note: z.string().default(""),
+    })
+    .nullable(),
+);
 
 const accommodationSchema = z.object({
   type: z.string(),

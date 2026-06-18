@@ -36,6 +36,25 @@ describe("itinerary schema", () => {
     expect(() => itinerarySchema.parse([validDay])).not.toThrow();
   });
 
+  it("coerces an empty/modeless transport object to null", () => {
+    // The live model emits {} or a partial object on no-travel days.
+    const emptyTransport = itineraryDaySchema.parse({ ...validDay, transport_from_previous: {} });
+    expect(emptyTransport.transport_from_previous).toBeNull();
+    const partial = itineraryDaySchema.parse({
+      ...validDay,
+      transport_from_previous: { cost_usd: 0, booking_note: "" },
+    });
+    expect(partial.transport_from_previous).toBeNull();
+  });
+
+  it("keeps a well-formed transport object", () => {
+    const withTransport = itineraryDaySchema.parse({
+      ...validDay,
+      transport_from_previous: { mode: "train", duration: "2h", cost_usd: 35, booking_note: "book ahead" },
+    });
+    expect(withTransport.transport_from_previous?.mode).toBe("train");
+  });
+
   it("accepts an event highlight", () => {
     const withEvent = {
       ...validDay,

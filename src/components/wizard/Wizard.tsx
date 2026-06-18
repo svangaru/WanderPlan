@@ -189,7 +189,7 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
     <div className="mx-auto w-full max-w-2xl px-5 py-6">
       <div className="mb-6 flex items-center justify-between">
         <button
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/globe")}
           className="text-sm text-slate-400 hover:text-teal-300"
         >
           ← Globe
@@ -203,7 +203,7 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
             />
           ))}
         </div>
-        <MiniGlobe onClick={() => router.push("/")} />
+        <MiniGlobe onClick={() => router.push("/globe")} />
       </div>
 
       <h2 className="wp-display mb-1 text-2xl text-white">{STEPS[step]}</h2>

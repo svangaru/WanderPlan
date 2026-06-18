@@ -26,6 +26,23 @@ export function GlobeLanding() {
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [selected, setSelected] = useState<string[]>([]);
   const [launching, setLaunching] = useState(false);
+  const [landPolygons, setLandPolygons] = useState<object[]>([]);
+
+  // Load country borders for the globe surface (bundled, fetched once).
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/data/countries-110m.geojson")
+      .then((r) => r.json())
+      .then((geo: { features?: object[] }) => {
+        if (!cancelled) setLandPolygons(geo.features ?? []);
+      })
+      .catch(() => {
+        /* globe still renders with markers if borders fail to load */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -82,6 +99,11 @@ export function GlobeLanding() {
             showAtmosphere
             atmosphereColor="#00E5C3"
             atmosphereAltitude={0.18}
+            polygonsData={landPolygons}
+            polygonAltitude={0.006}
+            polygonCapColor={() => "rgba(36,60,99,0.75)"}
+            polygonSideColor={() => "rgba(0,0,0,0)"}
+            polygonStrokeColor={() => "rgba(0,229,195,0.35)"}
             pointsData={points}
             pointLat={(d: object) => (d as GlobeCountry).lat}
             pointLng={(d: object) => (d as GlobeCountry).lng}

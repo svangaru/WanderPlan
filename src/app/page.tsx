@@ -1,5 +1,5 @@
-import { GlobeLanding } from "@/components/globe/GlobeLanding";
+import { Landing } from "@/components/landing/Landing";
 
 export default function HomePage() {
-  return <GlobeLanding />;
+  return <Landing />;
 }

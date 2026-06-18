@@ -97,7 +97,7 @@ export function ItineraryView({
           >
             ⚡ live_events ({events.length})
           </button>
-          <MiniGlobe onClick={() => router.push("/")} />
+          <MiniGlobe onClick={() => router.push("/globe")} />
         </div>
       </div>
 

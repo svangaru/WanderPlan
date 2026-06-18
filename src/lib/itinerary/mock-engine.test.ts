@@ -32,6 +32,11 @@ function ctx(overrides: Partial<GenerationContext["trip"]> = {}): GenerationCont
       mobility: false,
       budget: 150,
       countries: ["IT"],
+      originAirport: "JFK",
+      arrivalAirport: "FCO",
+      flightCode: "",
+      arrivalTime: "Morning",
+      departureTime: "Morning",
       ...overrides,
     },
     prefs: { ...DEFAULT_PREFS },
@@ -76,5 +81,11 @@ describe("mockGenerate", () => {
 
   it("returns nothing when there are no experiences", () => {
     expect(mockGenerate(ctx(), [], [])).toHaveLength(0);
+  });
+
+  it("makes Day 1 a relaxed arrival day for a late arrival", () => {
+    const days = mockGenerate(ctx({ arrivalTime: "Late night" }), experiences, events);
+    expect(days[0].day_theme).toMatch(/Arrival/);
+    expect(days[0].morning.activity).toMatch(/Arrive at FCO/);
   });
 });

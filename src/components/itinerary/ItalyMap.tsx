@@ -58,6 +58,22 @@ export function ItalyMap({
       ? "M" + stops.map((s) => project(s.lng, s.lat).map((n) => n.toFixed(1)).join(",")).join("L")
       : "";
 
+  // Declutter labels: markers stay at true positions, but text labels are pushed
+  // down so close stops (e.g. Naples + Amalfi) don't overlap. A leader line
+  // connects a moved label back to its marker.
+  const LABEL_GAP = 24;
+  const placed = stops
+    .map((s, i) => {
+      const [x, y] = project(s.lng, s.lat);
+      return { s, i, x, y, labelY: y };
+    })
+    .sort((a, b) => a.y - b.y);
+  let lastLabelY = -Infinity;
+  for (const p of placed) {
+    if (p.labelY < lastLabelY + LABEL_GAP) p.labelY = lastLabelY + LABEL_GAP;
+    lastLabelY = p.labelY;
+  }
+
   return (
     <div className="flex justify-center">
       <svg viewBox="0 0 360 500" className="w-full max-w-sm">
@@ -81,18 +97,28 @@ export function ItalyMap({
             className="wp-route"
           />
         )}
-        {stops.map((s, i) => {
-          const [x, y] = project(s.lng, s.lat);
+        {placed.map(({ s, i, x, y, labelY }) => {
+          const moved = Math.abs(labelY - y) > 3;
           return (
             <g key={s.city + i}>
+              {moved && (
+                <line
+                  x1={x + 9}
+                  y1={y}
+                  x2={x + 12}
+                  y2={labelY}
+                  stroke="#27406b"
+                  strokeWidth="0.75"
+                />
+              )}
               <circle cx={x} cy={y} r="9" fill="#0A0F1E" stroke="#00E5C3" strokeWidth="1.5" />
               <text x={x} y={y + 3.5} textAnchor="middle" fontSize="9" fill="#00E5C3" fontWeight="700">
                 {i + 1}
               </text>
-              <text x={x + 13} y={y + 3.5} fontSize="10" fill="#cbd5e1">
+              <text x={x + 14} y={labelY + 2} fontSize="10" fill="#cbd5e1">
                 {s.city}
               </text>
-              <text x={x + 13} y={y + 14} fontSize="8" fill="#64748b">
+              <text x={x + 14} y={labelY + 12.5} fontSize="8" fill="#64748b">
                 Day {s.firstDay}
                 {s.lastDay !== s.firstDay ? `–${s.lastDay}` : ""}
               </text>

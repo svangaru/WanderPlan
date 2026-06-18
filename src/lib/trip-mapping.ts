@@ -86,6 +86,11 @@ export function dbToTripInput(trip: Trip, prefs: TripPreference | null): TripInp
     mobility: prefs?.mobilityNeeds ?? false,
     budget: prefs?.budgetPerDayUsd ? Number(prefs.budgetPerDayUsd) : 150,
     countries: trip.countries,
+    originAirport: trip.originAirport ?? "",
+    arrivalAirport: trip.arrivalAirport ?? "",
+    flightCode: trip.flightCode ?? "",
+    arrivalTime: (trip.arrivalTime as TripInput["arrivalTime"]) ?? "Morning",
+    departureTime: (trip.departureTime as TripInput["departureTime"]) ?? "Morning",
   };
 }
 

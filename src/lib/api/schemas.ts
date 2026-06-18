@@ -24,6 +24,8 @@ export const preferencesSchema = z.object({
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "expected YYYY-MM-DD");
 
+const partOfDay = z.enum(["Morning", "Afternoon", "Evening", "Late night"]);
+
 export const tripInputSchema = z.object({
   startDate: isoDate,
   endDate: isoDate,
@@ -35,7 +37,13 @@ export const tripInputSchema = z.object({
   dietary: z.array(z.string().max(50)).default([]),
   mobility: z.boolean().default(false),
   budget: z.number().min(20).max(5000),
-  countries: z.array(z.string().length(2)).min(1).max(5),
+  // One country per trip in v1.
+  countries: z.array(z.string().length(2)).length(1),
+  originAirport: z.string().max(8).default(""),
+  arrivalAirport: z.string().max(8).default(""),
+  flightCode: z.string().max(16).default(""),
+  arrivalTime: partOfDay.default("Morning"),
+  departureTime: partOfDay.default("Morning"),
 });
 
 /** Draft trip save: trip fields + preferences, used by the wizard as it advances. */

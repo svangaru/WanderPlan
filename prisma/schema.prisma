@@ -177,6 +177,12 @@ model Trip {
   endCity         String   @db.VarChar(100)
   endCountry      String   @db.Char(2)
   countries       String[] @db.Char(2)
+  // Flight details — help the itinerary respect arrival/departure timing.
+  originAirport   String?  @db.VarChar(8)  // IATA code the traveler departs from
+  arrivalAirport  String?  @db.VarChar(8)  // IATA code they fly into
+  flightCode      String?  @db.VarChar(16) // optional, e.g. "AZ609"
+  arrivalTime     String?  @db.VarChar(20) // part of day: Morning/Afternoon/Evening/Late night
+  departureTime   String?  @db.VarChar(20)
   status          String   @default("draft") // draft, planning, confirmed, completed
   isCollaborative Boolean  @default(false)
   shareToken      String?  @db.Uuid

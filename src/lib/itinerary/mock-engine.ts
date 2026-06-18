@@ -163,5 +163,31 @@ export function mockGenerate(
     }
   });
 
+  // A late arrival "wastes" Day 1 — make it a relaxed arrival day.
+  const lateArrival = trip.arrivalTime === "Evening" || trip.arrivalTime === "Late night";
+  if (lateArrival && days.length > 0) {
+    const d0 = days[0];
+    const accomBase = prefs.accomStyle > 66 ? 220 : prefs.accomStyle < 33 ? 45 : 110;
+    d0.day_theme = `Arrival in ${d0.city}`;
+    d0.morning = {
+      activity: `Arrive at ${trip.arrivalAirport || "the airport"} & transfer`,
+      location: d0.city,
+      duration_hours: 2,
+      cost_usd: Math.round(40 * costMult),
+      tips: "Airport transfer to your accommodation — take it easy after the flight.",
+    };
+    d0.afternoon = {
+      activity: "Check in & settle in",
+      location: d0.city,
+      duration_hours: 2,
+      cost_usd: 0,
+      tips: "Drop bags, freshen up, and get your bearings in the neighbourhood.",
+    };
+    d0.daily_total_cost_usd = Math.round(
+      d0.morning.cost_usd + d0.evening.cost_usd + accomBase * costMult + 25 * costMult,
+    );
+    d0.local_tip = `You land in the ${trip.arrivalTime.toLowerCase()} — Day 1 is kept light on purpose.`;
+  }
+
   return days;
 }

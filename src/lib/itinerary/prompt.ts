@@ -44,6 +44,7 @@ export function buildItineraryPrompt(
   return `You are WanderPlan's expert travel curator. Generate ${count === totalDays ? `a ${totalDays}-day` : `days ${dayStart}–${dayEnd} of a ${totalDays}-day`} ${countryNames} itinerary.
 
 TRIP: ${trip.startDate} to ${trip.endDate}. Start city: ${trip.startCity || "Rome"}. End city: ${trip.returnTrip ? trip.startCity || "Rome" : trip.endCity || trip.startCity || "Rome"}. Group: ${trip.groupSize} (${trip.groupType}). Budget/day/person: $${trip.budget}.
+FLIGHTS: Arrives at ${trip.arrivalAirport || "the destination airport"} on ${trip.startDate} in the ${trip.arrivalTime.toLowerCase()}${trip.flightCode ? ` (flight ${trip.flightCode})` : ""}; departs from ${trip.originAirport || "home"} side on ${trip.endDate} in the ${trip.departureTime.toLowerCase()}. IMPORTANT: scale Day 1 to the arrival time — an Evening or Late night arrival means Day 1 is just airport transfer, check-in, and a relaxed nearby dinner (no full-day activities). Likewise keep the final day light if departure is in the Morning.
 DIETARY: ${trip.dietary.join(", ") || "none"}. MOBILITY NEEDS: ${trip.mobility ? "yes — avoid strenuous hikes/stairs" : "no"}.
 ${opts.lockedSummary ? `ALREADY-FIXED DAYS (do not change; continue the route logically with no backtracking): ${opts.lockedSummary}` : ""}
 

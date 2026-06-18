@@ -7,7 +7,7 @@ const FEATURES = [
   {
     icon: "🌍",
     title: "Pick on a 3D globe",
-    body: "Spin an interactive globe and choose up to 5 countries. Italy and 9 more of the world's most-visited destinations are live.",
+    body: "Spin an interactive globe and choose your destination. Italy and 9 more of the world's most-visited countries are live.",
   },
   {
     icon: "🎚️",
@@ -84,7 +84,7 @@ export function Landing() {
             Plan trips you&apos;ll <span style={{ color: "#00E5C3" }}>actually love.</span>
           </h1>
           <p className="mt-5 max-w-xl text-base text-slate-400 md:text-lg">
-            Pick countries on a glowing 3D globe, set your travel style with sliders, and get a
+            Pick a country on a glowing 3D globe, set your travel style with sliders, and get a
             personalized day-by-day itinerary built from real experiences and live local events.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row">

@@ -3,6 +3,9 @@ import type { PrefKey } from "@/lib/constants";
 /** Slider preferences (0-100), keyed by the wizard's slider keys. */
 export type Preferences = Record<PrefKey, number>;
 
+/** Part-of-day options for arrival/departure timing. */
+export type PartOfDay = "Morning" | "Afternoon" | "Evening" | "Late night";
+
 /** Trip form state as collected by the wizard (wire shape). */
 export interface TripInput {
   startDate: string; // ISO YYYY-MM-DD
@@ -15,7 +18,12 @@ export interface TripInput {
   dietary: string[];
   mobility: boolean;
   budget: number; // USD per person per day
-  countries: string[]; // ISO alpha-2 codes
+  countries: string[]; // ISO alpha-2 codes (exactly one in v1)
+  originAirport: string; // IATA code the traveler departs from
+  arrivalAirport: string; // IATA code they fly into
+  flightCode: string; // optional, e.g. "AZ609"
+  arrivalTime: PartOfDay; // when they land on the first day
+  departureTime: PartOfDay; // when they fly out on the last day
 }
 
 /** Context passed to the generation engines. */

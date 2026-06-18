@@ -24,6 +24,11 @@ export async function saveDraftTrip(
     endCity,
     endCountry: primaryCountry,
     countries: trip.countries,
+    originAirport: trip.originAirport || null,
+    arrivalAirport: trip.arrivalAirport || null,
+    flightCode: trip.flightCode || null,
+    arrivalTime: trip.arrivalTime || null,
+    departureTime: trip.departureTime || null,
     status: "draft",
   };
 

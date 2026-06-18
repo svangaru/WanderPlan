@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import * as THREE from "three";
-import { GLOBE_COUNTRIES, MAX_COUNTRIES_PER_TRIP } from "@/lib/constants";
+import { GLOBE_COUNTRIES } from "@/lib/constants";
 import { useToast } from "@/components/ui/Toast";
 import { LaunchTransition } from "@/components/globe/LaunchTransition";
 
@@ -60,14 +60,9 @@ export function GlobeLanding() {
     [],
   );
 
+  // One country per trip — selecting a new country replaces the current pick.
   const toggle = (code: string) => {
-    setSelected((s) =>
-      s.includes(code)
-        ? s.filter((c) => c !== code)
-        : s.length < MAX_COUNTRIES_PER_TRIP
-          ? [...s, code]
-          : (show(`Max ${MAX_COUNTRIES_PER_TRIP} countries`), s),
-    );
+    setSelected((s) => (s.includes(code) ? [] : [code]));
   };
 
   const onPointClick = (point: object) => {
@@ -131,7 +126,7 @@ export function GlobeLanding() {
           Wander<span style={{ color: "#00E5C3" }}>Plan</span>
         </h1>
         <p className="mt-1 max-w-md text-sm text-slate-400 md:text-base">
-          Spin the globe. Pick up to 5 countries. We&apos;ll build the trip around what you actually
+          Spin the globe. Pick a country. We&apos;ll build the trip around what you actually
           love.
         </p>
       </div>

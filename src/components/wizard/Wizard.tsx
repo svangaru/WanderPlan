@@ -24,9 +24,10 @@ import { GeneratingScreen } from "@/components/wizard/GeneratingScreen";
 import { MiniGlobe } from "@/components/ui/MiniGlobe";
 import { useToast } from "@/components/ui/Toast";
 
-const STEPS = ["Dates & Route", "Travelers", "Preferences", "Budget", "Review"];
+const STEPS = ["Dates & Flights", "Travelers", "Preferences", "Budget", "Review"];
+const PARTS_OF_DAY: TripInput["arrivalTime"][] = ["Morning", "Afternoon", "Evening", "Late night"];
 const STEP_BLURBS = [
-  "when and where does it start?",
+  "when do you arrive, and which airports?",
   "Who's coming?",
   "Slide what matters to you — this drives the AI.",
   "What's the daily damage you're comfortable with?",
@@ -68,7 +69,12 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
     dietary: [],
     mobility: false,
     budget: 150,
-    countries: initialCountries.length ? initialCountries : ["IT"],
+    countries: initialCountries.length ? initialCountries.slice(0, 1) : ["IT"],
+    originAirport: "",
+    arrivalAirport: "",
+    flightCode: "",
+    arrivalTime: "Morning",
+    departureTime: "Morning",
   });
   const [prefs, setPrefs] = useState<Preferences>({ ...DEFAULT_PREFS });
 
@@ -92,7 +98,11 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
   const flavor = countryFlavor(trip.countries[0] ?? "IT");
   const totalDays = daysBetween(trip.startDate, trip.endDate);
   const stepValid = [
-    totalDays >= 3 && totalDays <= 365 && trip.startCity.trim().length > 0,
+    totalDays >= 3 &&
+      totalDays <= 365 &&
+      trip.startCity.trim().length > 0 &&
+      trip.originAirport.trim().length > 0 &&
+      trip.arrivalAirport.trim().length > 0,
     trip.groupSize >= 1,
     true,
     trip.budget >= 20,
@@ -263,6 +273,86 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
             />
             Return trip (end where I start)
           </label>
+
+          <div className="border-t border-slate-800 pt-4">
+            <h3 className="mb-3 flex items-center gap-2 text-xs uppercase tracking-widest text-slate-400">
+              <span>✈️</span> Flights
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-xs text-slate-400">Departing airport</label>
+                <input
+                  className={FIELD}
+                  placeholder="e.g. JFK"
+                  value={trip.originAirport}
+                  maxLength={8}
+                  onChange={(e) =>
+                    setTrip({ ...trip, originAirport: e.target.value.toUpperCase() })
+                  }
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-slate-400">Arriving airport</label>
+                <input
+                  className={FIELD}
+                  placeholder="e.g. FCO"
+                  value={trip.arrivalAirport}
+                  maxLength={8}
+                  onChange={(e) =>
+                    setTrip({ ...trip, arrivalAirport: e.target.value.toUpperCase() })
+                  }
+                />
+              </div>
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              <div>
+                <label className="mb-1 block text-xs text-slate-400">Arrive</label>
+                <select
+                  className={FIELD}
+                  value={trip.arrivalTime}
+                  onChange={(e) =>
+                    setTrip({ ...trip, arrivalTime: e.target.value as TripInput["arrivalTime"] })
+                  }
+                >
+                  {PARTS_OF_DAY.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-slate-400">Depart</label>
+                <select
+                  className={FIELD}
+                  value={trip.departureTime}
+                  onChange={(e) =>
+                    setTrip({ ...trip, departureTime: e.target.value as TripInput["departureTime"] })
+                  }
+                >
+                  {PARTS_OF_DAY.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-slate-400">Flight code</label>
+                <input
+                  className={FIELD}
+                  placeholder="optional"
+                  value={trip.flightCode}
+                  maxLength={16}
+                  onChange={(e) => setTrip({ ...trip, flightCode: e.target.value.toUpperCase() })}
+                />
+              </div>
+            </div>
+            <p className="mt-2 text-[11px] text-slate-500">
+              A late arrival keeps Day 1 light so you don&apos;t waste it.
+            </p>
+          </div>
+
           <div
             className="rounded-lg border px-3 py-2.5 text-sm"
             style={{
@@ -421,6 +511,10 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
             <Row
               k="Group"
               v={`${trip.groupSize} · ${trip.groupType}${trip.dietary.length ? " · " + trip.dietary.join(", ") : ""}`}
+            />
+            <Row
+              k="Flights"
+              v={`${trip.originAirport || "—"} → ${trip.arrivalAirport || "—"} · arrive ${trip.arrivalTime.toLowerCase()}${trip.flightCode ? ` · ${trip.flightCode}` : ""}`}
             />
             <Row k="Budget" v={`$${trip.budget}/day/person`} />
             <Row k="Top priorities" v={topPriorities(prefs)} />

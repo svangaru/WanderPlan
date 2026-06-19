@@ -1,6 +1,5 @@
 import { daysBetween } from "@/lib/dates";
 import { mockGenerate } from "@/lib/itinerary/mock-engine";
-import { generateLive } from "@/lib/itinerary/claude-engine";
 import { generateLiveML } from "@/lib/itinerary/claude-engine-ml";
 import { liveAllowedForLength, GUARDRAILS } from "@/lib/itinerary/guardrails";
 import type { Itinerary } from "@/lib/itinerary/schema";

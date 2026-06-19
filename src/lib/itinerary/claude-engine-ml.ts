@@ -9,11 +9,11 @@
  */
 
 import { scoreExperiences } from "./scoring";
-import { buildItineraryPrompt } from "@/lib/itinerary/prompt";
 import { generateLive } from "./claude-engine";
 import type { ExperienceContext, EventContext, GenerationContext } from "@/lib/types";
 import type { Itinerary } from "./schema";
-import { GUARDRAILS } from "./guardrails";
+import type { CountryExperience } from "@prisma/client";
+import { Decimal } from "@prisma/client/runtime/library";
 
 export interface MLGenerateResult {
   itinerary: Itinerary;
@@ -41,11 +41,30 @@ export async function generateLiveML(
 ): Promise<MLGenerateResult> {
   // Layer 1: Score experiences based on preferences
   // This doesn't call Claude, just ranks what we have in the DB
+  // Convert ExperienceContext to CountryExperience format for scoring
+  const dbExperiences = experiences.map((e) => ({
+    id: e.id,
+    countryId: "", // not used in scoring
+    category: e.category,
+    name: e.name,
+    description: e.description,
+    locationCity: e.city,
+    locationLat: new Decimal(e.lat),
+    locationLng: new Decimal(e.lng),
+    avgCostUsd: new Decimal(e.cost_usd),
+    durationHours: new Decimal(e.hours),
+    bestSeason: [],
+    accessibility: new Decimal(5),
+    popularityScore: new Decimal(e.popularity),
+    sourceUrl: null,
+    lastVerified: null,
+    createdAt: new Date(),
+  } as CountryExperience));
+
   const scoredExperiences = scoreExperiences(
-    experiences as any,
+    dbExperiences,
     ctx.prefs,
     ctx.trip.startDate,
-    ctx.trip.endDate,
   );
 
   // Take top 20 experiences (reduce context size, focus on best matches)
@@ -67,11 +86,12 @@ export async function generateLiveML(
   if (topExperiences.length === 0) {
     console.warn(`[ML] No scored experiences found, falling back to all experiences`);
     // Fall back to original experiences
+    const fallbackResult = await generateLive(ctx, experiences, events, {
+      maxTokens: options.maxTokens,
+      onText: options.onText,
+    });
     return {
-      itinerary: await (await generateLive(ctx, experiences, events, {
-        maxTokens: options.maxTokens,
-        onText: options.onText,
-      })).itinerary,
+      itinerary: fallbackResult.itinerary,
       source: "claude",
       usage: { inputTokens: 0, outputTokens: 0 },
       rawPrompt: "",

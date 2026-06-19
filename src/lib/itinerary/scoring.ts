@@ -4,7 +4,6 @@
  * Layer 1 of the hybrid cascade: deterministic, fast ($0).
  */
 
-import { Decimal } from "@prisma/client/runtime/library";
 import { CATEGORY_TO_PREF, PrefKey } from "@/lib/constants";
 import type { CountryExperience } from "@prisma/client";
 import type { Preferences } from "@/lib/types";
@@ -33,7 +32,6 @@ export function scoreExperience(
   experience: CountryExperience,
   prefs: Preferences,
   tripStartDate: string,
-  tripEndDate: string,
 ): ScoredExperience {
   const category = experience.category as keyof typeof CATEGORY_TO_PREF;
   const prefKey = CATEGORY_TO_PREF[category];
@@ -104,10 +102,9 @@ export function scoreExperiences(
   experiences: CountryExperience[],
   prefs: Preferences,
   tripStartDate: string,
-  tripEndDate: string,
 ): ScoredExperience[] {
   return experiences
-    .map((exp) => scoreExperience(exp, prefs, tripStartDate, tripEndDate))
+    .map((exp) => scoreExperience(exp, prefs, tripStartDate))
     .sort((a, b) => b.score - a.score);
 }
 

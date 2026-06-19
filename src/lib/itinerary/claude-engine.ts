@@ -78,12 +78,15 @@ export async function generateLive(
     dayStart?: number;
     dayEnd?: number;
     lockedSummary?: string;
+    customPrompt?: string;
     onText?: (delta: string) => void;
   } = {},
 ): Promise<LiveResult> {
   const client = getClient();
   const maxTokens = opts.maxTokens ?? GUARDRAILS.liveMaxTokens;
-  const basePrompt = buildItineraryPrompt(ctx, experiences, events, {
+
+  // If custom prompt is provided (e.g., for ML polish), use it; otherwise build standard prompt
+  const basePrompt = opts.customPrompt || buildItineraryPrompt(ctx, experiences, events, {
     dayStart: opts.dayStart,
     dayEnd: opts.dayEnd,
     lockedSummary: opts.lockedSummary,

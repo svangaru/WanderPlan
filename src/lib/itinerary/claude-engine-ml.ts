@@ -1,0 +1,80 @@
+/**
+ * ML-integrated generation: use rule-based scoring to feed Claude only relevant experiences.
+ *
+ * Flow:
+ * 1. Use cascadePlan() to score and rank experiences based on preferences
+ * 2. Build an enriched prompt for Claude with only top-scored experiences per category
+ * 3. Claude generates the itinerary from this curated, preference-filtered context
+ * 4. Cost: rules are $0; Claude call is same cost but with better prompt (less hallucination)
+ */
+
+import { scoreExperiences } from "./scoring";
+import { buildItineraryPrompt } from "@/lib/itinerary/prompt";
+import { generateLive } from "./claude-engine";
+import type { ExperienceContext, EventContext, GenerationContext } from "@/lib/types";
+import type { Itinerary } from "./schema";
+import { GUARDRAILS } from "./guardrails";
+
+export interface MLGenerateResult {
+  itinerary: Itinerary;
+  source: "claude";
+  usage: { inputTokens: number; outputTokens: number };
+  rawPrompt: string;
+  rawResponse: string;
+}
+
+/**
+ * Generate itinerary using ML-informed Claude generation.
+ *
+ * The cascade (Layer 1) scores all experiences based on preferences.
+ * We pass the top-scored experiences to Claude to ensure the prompt is
+ * focused on what the user actually wants, reducing hallucination and wasted tokens.
+ */
+export async function generateLiveML(
+  ctx: GenerationContext,
+  experiences: ExperienceContext[],
+  events: EventContext[],
+  options: {
+    maxTokens: number;
+    onText?: (delta: string) => void;
+  },
+): Promise<MLGenerateResult> {
+  // Layer 1: Score experiences based on preferences
+  // This doesn't call Claude, just ranks what we have in the DB
+  const scoredExperiences = scoreExperiences(
+    experiences as any,
+    ctx.prefs,
+    ctx.trip.startDate,
+    ctx.trip.endDate,
+  );
+
+  // Take top 20 experiences (reduce context size, focus on best matches)
+  // Map from Prisma CountryExperience to ExperienceContext format
+  const topExperiences: ExperienceContext[] = scoredExperiences.slice(0, 20).map((exp) => ({
+    id: exp.id,
+    name: exp.name,
+    city: exp.locationCity,
+    category: exp.category,
+    cost_usd: Number(exp.avgCostUsd),
+    hours: Number(exp.durationHours),
+    popularity: Number(exp.popularityScore),
+    lat: Number(exp.locationLat),
+    lng: Number(exp.locationLng),
+    description: exp.description,
+  }));
+
+  // Use standard Claude generation but with the ML-filtered experience set
+  // This keeps the same itinerary format and flow, just with better-ranked inputs
+  const result = await generateLive(ctx, topExperiences, events, {
+    maxTokens: options.maxTokens,
+    onText: options.onText,
+  });
+
+  return {
+    itinerary: result.itinerary,
+    source: "claude",
+    usage: result.usage,
+    rawPrompt: result.rawPrompt,
+    rawResponse: result.rawResponse,
+  };
+}

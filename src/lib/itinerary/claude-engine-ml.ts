@@ -91,13 +91,20 @@ export async function generateLiveML(
     }))
     .sort((a, b) => b.score - a.score);
 
-  // TODO: Use top 20 in future once Claude performs well with filtered context
-  // For now, pass all experiences to Claude (scoring is ready when needed)
+  // Smart filtering: keep top 30 globally (ensures variety) + all from trip start/end cities
+  // This balances prompt size with quality
+  const topGlobal = new Set(scored.slice(0, 30).map((e) => e.id));
+  const tripCities = new Set([ctx.trip.startCity, ctx.trip.endCity].filter(Boolean));
+
+  const filtered = scored.filter((exp) =>
+    topGlobal.has(exp.id) || tripCities.has(exp.city)
+  );
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const allExperiences = scored.map(({ score, ...exp }) => exp);
+  const contextExperiences = filtered.map(({ score, ...exp }) => exp);
 
   // Pass to Claude
-  const result = await generateLive(ctx, allExperiences, events, {
+  const result = await generateLive(ctx, contextExperiences, events, {
     maxTokens: options.maxTokens,
     onText: options.onText,
   });
@@ -108,6 +115,6 @@ export async function generateLiveML(
     usage: result.usage,
     rawPrompt: result.rawPrompt,
     rawResponse: result.rawResponse,
-    scoredCount: allExperiences.length,
+    scoredCount: contextExperiences.length,
   };
 }

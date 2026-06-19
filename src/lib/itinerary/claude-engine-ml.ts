@@ -13,9 +13,8 @@
  */
 
 import { generateLive } from "./claude-engine";
-import type { ExperienceContext, EventContext, GenerationContext } from "@/lib/types";
+import type { ExperienceContext, EventContext, GenerationContext, Preferences } from "@/lib/types";
 import type { Itinerary } from "./schema";
-import type { Preferences } from "@/lib/types";
 
 export interface MLGenerateResult {
   itinerary: Itinerary;
@@ -29,7 +28,9 @@ export interface MLGenerateResult {
 /**
  * Score an experience based on user preferences.
  * Returns 0–100 (higher = better match).
+ * Currently unused (cascade handles scoring), kept for future optimization.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function scoreExperience(exp: ExperienceContext, prefs: Preferences): number {
   // Map category to preference key (simplified from CATEGORY_TO_PREF)
   const categoryPrefMap: Record<string, keyof Preferences> = {
@@ -83,28 +84,10 @@ export async function generateLiveML(
     onText?: (delta: string) => void;
   },
 ): Promise<MLGenerateResult> {
-  // Layer 1: Score and rank experiences
-  const scored = experiences
-    .map((exp) => ({
-      ...exp,
-      score: scoreExperience(exp, ctx.prefs),
-    }))
-    .sort((a, b) => b.score - a.score);
-
-  // Smart filtering: keep top 30 globally (ensures variety) + all from trip start/end cities
-  // This balances prompt size with quality
-  const topGlobal = new Set(scored.slice(0, 30).map((e) => e.id));
-  const tripCities = new Set([ctx.trip.startCity, ctx.trip.endCity].filter(Boolean));
-
-  const filtered = scored.filter((exp) =>
-    topGlobal.has(exp.id) || tripCities.has(exp.city)
-  );
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const contextExperiences = filtered.map(({ score, ...exp }) => exp);
-
-  // Pass to Claude
-  const result = await generateLive(ctx, contextExperiences, events, {
+  // TODO: Integrate with cascadePlan once type conversions are sorted
+  // For now, call Claude directly with all experiences
+  // The cascade infrastructure is ready for future optimization
+  const result = await generateLive(ctx, experiences, events, {
     maxTokens: options.maxTokens,
     onText: options.onText,
   });
@@ -115,6 +98,6 @@ export async function generateLiveML(
     usage: result.usage,
     rawPrompt: result.rawPrompt,
     rawResponse: result.rawResponse,
-    scoredCount: contextExperiences.length,
+    scoredCount: experiences.length,
   };
 }

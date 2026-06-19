@@ -127,7 +127,7 @@ export function CountryMap({
           .setLngLat([stop.lng, stop.lat])
           .setPopup(
             new mapboxgl.Popup({ offset: 25 }).setHTML(
-              `<div class="text-sm"><strong>${stop.city}</strong><br/>Day ${stop.dayNumber}</div>`,
+              `<div class="text-sm text-slate-900"><strong>${stop.city}</strong><br/>Day ${stop.dayNumber}</div>`,
             ),
           )
           .addTo(map.current!);

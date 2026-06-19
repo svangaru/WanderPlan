@@ -10,7 +10,6 @@
 import { scoreExperiences, calculateItineraryQuality, pickTopPerCity } from "./scoring";
 import type { CountryExperience } from "@prisma/client";
 import type { Preferences, TripInput } from "@/lib/types";
-import type { ScoredExperience } from "./scoring";
 
 export interface CascadeResult {
   source: "rules" | "embeddings" | "claude";
@@ -49,7 +48,7 @@ export async function planWithRules(
   days: ItineraryDay[];
   quality: number;
 }> {
-  const scored = scoreExperiences(experiences, prefs, trip.startDate, trip.endDate);
+  const scored = scoreExperiences(experiences, prefs, trip.startDate);
 
   // Group by city and pick top 3 per city
   const byCity = pickTopPerCity(scored, 3);
@@ -132,9 +131,12 @@ export async function refineWithEmbeddings(
  */
 export async function refineWithClaude(
   days: ItineraryDay[],
-  trip: TripInput,
-  prefs: Preferences,
-  experiences: CountryExperience[],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _trip: TripInput,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _prefs: Preferences,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _experiences: CountryExperience[],
 ): Promise<{
   days: ItineraryDay[];
   quality: number;

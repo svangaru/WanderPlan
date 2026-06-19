@@ -30,8 +30,8 @@ describe("scoreExperience", () => {
     const highFoodPrefs = { ...DEFAULT_PREFS, food: 100 };
     const lowFoodPrefs = { ...DEFAULT_PREFS, food: 0 };
 
-    const highScore = scoreExperience(exp, highFoodPrefs, "2026-06-15", "2026-06-22");
-    const lowScore = scoreExperience(exp, lowFoodPrefs, "2026-06-15", "2026-06-22");
+    const highScore = scoreExperience(exp, highFoodPrefs, "2026-06-15");
+    const lowScore = scoreExperience(exp, lowFoodPrefs, "2026-06-15");
 
     expect(highScore.score).toBeGreaterThan(lowScore.score);
   });
@@ -41,8 +41,8 @@ describe("scoreExperience", () => {
     const expExpensive = mockExperience({ avgCostUsd: new Decimal("200") });
     const budgetSensitivePrefs = { ...DEFAULT_PREFS, minCost: 100 };
 
-    const cheapScore = scoreExperience(expCheap, budgetSensitivePrefs, "2026-06-15", "2026-06-22");
-    const expensiveScore = scoreExperience(expExpensive, budgetSensitivePrefs, "2026-06-15", "2026-06-22");
+    const cheapScore = scoreExperience(expCheap, budgetSensitivePrefs, "2026-06-15");
+    const expensiveScore = scoreExperience(expExpensive, budgetSensitivePrefs, "2026-06-15");
 
     expect(cheapScore.score).toBeGreaterThan(expensiveScore.score);
   });
@@ -52,15 +52,15 @@ describe("scoreExperience", () => {
     const juneDate = "2026-06-15"; // June trip
     const decemberDate = "2026-12-15"; // December trip
 
-    const juneScore = scoreExperience(exp, DEFAULT_PREFS, juneDate, "2026-06-22");
-    const decScore = scoreExperience(exp, DEFAULT_PREFS, decemberDate, "2026-12-22");
+    const juneScore = scoreExperience(exp, DEFAULT_PREFS, juneDate);
+    const decScore = scoreExperience(exp, DEFAULT_PREFS, decemberDate);
 
     expect(juneScore.score).toBeGreaterThan(decScore.score);
   });
 
   it("returns a score between 0 and 100", () => {
     const exp = mockExperience();
-    const score = scoreExperience(exp, DEFAULT_PREFS, "2026-06-15", "2026-06-22");
+    const score = scoreExperience(exp, DEFAULT_PREFS, "2026-06-15");
     expect(score.score).toBeGreaterThanOrEqual(0);
     expect(score.score).toBeLessThanOrEqual(100);
   });
@@ -74,7 +74,7 @@ describe("scoreExperiences", () => {
     ];
     const budgetPrefs = { ...DEFAULT_PREFS, minCost: 100, food: 100 };
 
-    const scored = scoreExperiences(exps, budgetPrefs, "2026-06-15", "2026-06-22");
+    const scored = scoreExperiences(exps, budgetPrefs, "2026-06-15");
     expect(scored[0].name).toBe("Cheap Food"); // cheaper + better budget match
     expect(scored[0].score).toBeGreaterThan(scored[1].score);
   });
@@ -82,7 +82,7 @@ describe("scoreExperiences", () => {
 
 describe("pickTopPerCity", () => {
   it("picks the top N experiences per city", () => {
-    const exps = [
+    const exps: Array<ReturnType<typeof mockExperience> & { score: number; scoreBreakdown: { preferenceMatch: number; popularcity: number; seasonalityBonus: number; costPenalty: number } }> = [
       {
         ...mockExperience({ name: "Rome 1", locationCity: "Rome", popularityScore: new Decimal("9") }),
         score: 90,
@@ -105,7 +105,7 @@ describe("pickTopPerCity", () => {
       },
     ];
 
-    const grouped = pickTopPerCity(exps as any, 2);
+    const grouped = pickTopPerCity(exps, 2);
     expect(grouped.get("Rome")).toHaveLength(2);
     expect(grouped.get("Florence")).toHaveLength(1);
     expect(grouped.get("Rome")?.[0].name).toBe("Rome 1"); // highest score first
@@ -114,7 +114,7 @@ describe("pickTopPerCity", () => {
 
 describe("calculateItineraryQuality", () => {
   it("returns a score between 0 and 10", () => {
-    const days = [
+    const days: Array<{ experiences: Array<ReturnType<typeof mockExperience> & { score: number; scoreBreakdown: { preferenceMatch: number; popularcity: number; seasonalityBonus: number; costPenalty: number } }> }> = [
       {
         experiences: [
           {
@@ -126,13 +126,13 @@ describe("calculateItineraryQuality", () => {
       },
     ];
 
-    const quality = calculateItineraryQuality(days as any);
+    const quality = calculateItineraryQuality(days);
     expect(quality).toBeGreaterThanOrEqual(0);
     expect(quality).toBeLessThanOrEqual(10);
   });
 
   it("gives higher quality scores to itineraries with more variety", () => {
-    const singleCategoryDay = [
+    const singleCategoryDay: Array<{ experiences: Array<ReturnType<typeof mockExperience> & { score: number; scoreBreakdown: { preferenceMatch: number; popularcity: number; seasonalityBonus: number; costPenalty: number } }> }> = [
       {
         experiences: [
           {
@@ -149,7 +149,7 @@ describe("calculateItineraryQuality", () => {
       },
     ];
 
-    const multiCategoryDay = [
+    const multiCategoryDay: Array<{ experiences: Array<ReturnType<typeof mockExperience> & { score: number; scoreBreakdown: { preferenceMatch: number; popularcity: number; seasonalityBonus: number; costPenalty: number } }> }> = [
       {
         experiences: [
           {
@@ -171,8 +171,8 @@ describe("calculateItineraryQuality", () => {
       },
     ];
 
-    const singleQuality = calculateItineraryQuality(singleCategoryDay as any);
-    const multiQuality = calculateItineraryQuality(multiCategoryDay as any);
+    const singleQuality = calculateItineraryQuality(singleCategoryDay);
+    const multiQuality = calculateItineraryQuality(multiCategoryDay);
 
     expect(multiQuality).toBeGreaterThan(singleQuality);
   });

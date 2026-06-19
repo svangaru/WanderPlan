@@ -1,6 +1,7 @@
 import { daysBetween } from "@/lib/dates";
 import { mockGenerate } from "@/lib/itinerary/mock-engine";
 import { generateLive } from "@/lib/itinerary/claude-engine";
+import { generateLiveML } from "@/lib/itinerary/claude-engine-ml";
 import { liveAllowedForLength, GUARDRAILS } from "@/lib/itinerary/guardrails";
 import type { Itinerary } from "@/lib/itinerary/schema";
 import type {
@@ -62,18 +63,19 @@ export async function generateItinerary(
   if (engine === "mock") return mockResult();
 
   try {
-    const live = await generateLive(ctx, experiences, events, {
+    // Use ML cascade: score experiences and feed top ones to Claude
+    const mlResult = await generateLiveML(ctx, experiences, events, {
       maxTokens: GUARDRAILS.liveMaxTokens,
       onText,
     });
     return {
-      itinerary: live.itinerary,
-      engine: "live",
-      usage: live.usage,
-      rawPrompt: live.rawPrompt,
-      rawResponse: live.rawResponse,
+      itinerary: mlResult.itinerary,
+      engine: "live", // Still uses Claude, but with ML-ranked inputs
+      usage: mlResult.usage,
+      rawPrompt: mlResult.rawPrompt,
+      rawResponse: mlResult.rawResponse,
     };
   } catch (err) {
-    return mockResult(err instanceof Error ? err.message : "live generation failed");
+    return mockResult(err instanceof Error ? err.message : "ML generation failed");
   }
 }

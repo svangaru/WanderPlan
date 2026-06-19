@@ -91,12 +91,12 @@ export async function generateLiveML(
     }))
     .sort((a, b) => b.score - a.score);
 
-  // Pick top 20 (or all if fewer than 20)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const topExperiences = scored.slice(0, 20).map(({ score, ...exp }) => exp);
+  // TODO: Use top 20 in future once Claude performs well with filtered context
+  // For now, pass all experiences to Claude (scoring is ready when needed)
+  const allExperiences = scored.map(({ score, ...exp }) => exp);
 
   // Pass to Claude
-  const result = await generateLive(ctx, topExperiences, events, {
+  const result = await generateLive(ctx, allExperiences, events, {
     maxTokens: options.maxTokens,
     onText: options.onText,
   });
@@ -107,6 +107,6 @@ export async function generateLiveML(
     usage: result.usage,
     rawPrompt: result.rawPrompt,
     rawResponse: result.rawResponse,
-    scoredCount: topExperiences.length,
+    scoredCount: allExperiences.length,
   };
 }

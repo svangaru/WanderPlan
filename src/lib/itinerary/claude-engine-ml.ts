@@ -92,6 +92,7 @@ export async function generateLiveML(
     .sort((a, b) => b.score - a.score);
 
   // Pick top 20 (or all if fewer than 20)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const topExperiences = scored.slice(0, 20).map(({ score, ...exp }) => exp);
 
   // Pass to Claude

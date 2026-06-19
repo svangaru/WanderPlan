@@ -130,7 +130,7 @@ export async function polishWithClaude(
 
     const responseText = message.content
       .filter((b) => b.type === "text")
-      .map((b) => (b as any).text)
+      .map((b) => (b as Anthropic.TextBlock).text)
       .join("");
 
     // Extract JSON array from response

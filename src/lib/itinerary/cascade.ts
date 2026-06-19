@@ -15,7 +15,6 @@
  */
 
 import { scoreExperiences, calculateItineraryQuality, pickTopPerCity } from "./scoring";
-import { refineExperiencesWithSimilarity } from "./embeddings";
 import { polishWithClaude } from "./claude-polish";
 import type { CountryExperience } from "@prisma/client";
 import type { Preferences, TripInput } from "@/lib/types";

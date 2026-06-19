@@ -22,8 +22,10 @@ import type { ExperienceContext } from "@/lib/types";
  */
 export function computeSimilarity(
   experience: ExperienceContext,
-  preferenceContext: string,
-  userPreferences: Record<string, number>,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _preferenceContext: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _userPreferences: Record<string, number>,
 ): number {
   // Placeholder implementation using category + popularity
   // Real implementation would use OpenAI embeddings API
@@ -58,8 +60,10 @@ export function findSimilarExperiences(
  */
 export function refineExperiencesWithSimilarity(
   experienceIds: string[],
-  allExperiences: ExperienceContext[],
-  qualityThreshold: number = 5,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _allExperiences: ExperienceContext[],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _qualityThreshold: number = 5,
 ): string[] {
   // For now, return original IDs
   // Real implementation would:

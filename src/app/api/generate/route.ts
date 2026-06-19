@@ -48,6 +48,7 @@ export async function POST(req: Request) {
 
   const tripInput = dbToTripInput(trip, trip.preferences);
   const prefs = dbToPrefs(trip.preferences);
+  const countryCode = tripInput.countries[0] ?? "IT";
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
@@ -56,25 +57,25 @@ export async function POST(req: Request) {
         controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
 
       try {
-        send({ type: "phase", message: "Querying country_experiences…", progress: 0.1 });
+        send({ type: "phase", message: `Querying experiences for your ${countryCode} trip…`, progress: 0.1 });
         const { experiences, events } = await assembleGroundingContext(
           tripInput.countries,
           tripInput.startDate,
           tripInput.endDate,
         );
 
-        send({ type: "phase", message: "Weighting experiences against your sliders…", progress: 0.3 });
-        send({ type: "phase", message: "Routing cities to minimize backtracking…", progress: 0.5 });
+        send({ type: "phase", message: "Scoring experiences against your preferences…", progress: 0.3 });
+        send({ type: "phase", message: "Optimizing your route…", progress: 0.5 });
 
         const result = await generateItinerary(
           { trip: tripInput, prefs },
           experiences,
           events,
           engine,
-          () => send({ type: "phase", message: "Drafting your days…", progress: 0.7 }),
+          () => send({ type: "phase", message: "Crafting your trip…", progress: 0.7 }),
         );
 
-        send({ type: "phase", message: "Saving your itinerary…", progress: 0.9 });
+        send({ type: "phase", message: "Saving your trip…", progress: 0.9 });
         const itineraryId = await persistItinerary({
           tripId,
           itinerary: result.itinerary,

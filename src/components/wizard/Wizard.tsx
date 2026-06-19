@@ -9,7 +9,9 @@ import {
   GROUP_TYPES,
   DIETARY_OPTIONS,
   countryFlavor,
+  defaultCity,
 } from "@/lib/constants";
+import { CityField } from "@/components/wizard/CityField";
 import { formatDate, daysBetween } from "@/lib/dates";
 import type { Preferences, TripInput, GenerationEngine } from "@/lib/types";
 import { streamPost } from "@/lib/sse-client";
@@ -24,12 +26,13 @@ import { GeneratingScreen } from "@/components/wizard/GeneratingScreen";
 import { MiniGlobe } from "@/components/ui/MiniGlobe";
 import { useToast } from "@/components/ui/Toast";
 
-const STEPS = ["Dates & Flights", "Travelers", "Preferences", "Budget", "Review"];
+const STEPS = ["Dates & Flights", "Travelers", "Experiences", "Style & Stays", "Budget", "Review"];
 const PARTS_OF_DAY: TripInput["arrivalTime"][] = ["Morning", "Afternoon", "Evening", "Late night"];
 const STEP_BLURBS = [
   "when do you arrive, and which airports?",
   "Who's coming?",
-  "Slide what matters to you — this drives the AI.",
+  "What do you want to do most? Slide what matters.",
+  "Your pace, discovery style, and where you sleep.",
   "What's the daily damage you're comfortable with?",
   "One last look before we generate.",
 ];
@@ -61,7 +64,7 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
   const [trip, setTrip] = useState<TripInput>({
     startDate: "2026-06-20",
     endDate: "2026-06-27",
-    startCity: "Rome",
+    startCity: defaultCity(initialCountries[0] ?? "IT") || "Rome",
     endCity: "",
     returnTrip: true,
     groupSize: 2,
@@ -95,7 +98,8 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
     if (hydrated) saveWizardState({ trip, prefs, step });
   }, [hydrated, trip, prefs, step]);
 
-  const flavor = countryFlavor(trip.countries[0] ?? "IT");
+  const primaryCode = trip.countries[0] ?? "IT";
+  const flavor = countryFlavor(primaryCode);
   const totalDays = daysBetween(trip.startDate, trip.endDate);
   const stepValid = [
     totalDays >= 3 &&
@@ -104,9 +108,10 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
       trip.originAirport.trim().length > 0 &&
       trip.arrivalAirport.trim().length > 0,
     trip.groupSize >= 1,
-    true,
+    true, // Experiences sliders
+    true, // Style & Stays sliders
     trip.budget >= 20,
-    true,
+    true, // Review
   ][step];
 
   /** Persists the draft (POST first time, PATCH after). Returns the trip id. */
@@ -244,25 +249,19 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-1 block text-xs text-slate-400">Start city</label>
-              <input
-                className={FIELD}
-                placeholder="e.g. Rome, Milan, Naples"
-                value={trip.startCity}
-                onChange={(e) => setTrip({ ...trip, startCity: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-slate-400">End city</label>
-              <input
-                className={FIELD}
-                placeholder="Same as start"
-                disabled={trip.returnTrip}
-                value={trip.returnTrip ? trip.startCity : trip.endCity}
-                onChange={(e) => setTrip({ ...trip, endCity: e.target.value })}
-              />
-            </div>
+            <CityField
+              label="Start city"
+              countryCode={primaryCode}
+              value={trip.startCity}
+              onChange={(city) => setTrip({ ...trip, startCity: city })}
+            />
+            <CityField
+              label="End city"
+              countryCode={primaryCode}
+              disabled={trip.returnTrip}
+              value={trip.returnTrip ? trip.startCity : trip.endCity}
+              onChange={(city) => setTrip({ ...trip, endCity: city })}
+            />
           </div>
           <label className="flex cursor-pointer items-center gap-2 text-sm text-slate-300">
             <input
@@ -377,7 +376,15 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
               min={1}
               max={12}
               value={trip.groupSize}
-              onChange={(e) => setTrip({ ...trip, groupSize: Number(e.target.value) })}
+              onChange={(e) => {
+                const n = Number(e.target.value);
+                setTrip((t) => ({
+                  ...t,
+                  groupSize: n,
+                  // Moving off 1 leaves "Solo"; landing on 1 means Solo.
+                  groupType: n === 1 ? "Solo" : t.groupType === "Solo" ? "Friends" : t.groupType,
+                }));
+              }}
               className="wp-slider w-full"
               style={{ ["--c" as string]: "#00E5C3", ["--p" as string]: `${(trip.groupSize / 12) * 100}%` }}
             />
@@ -388,7 +395,15 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
               {GROUP_TYPES.map((g) => (
                 <button
                   key={g}
-                  onClick={() => setTrip({ ...trip, groupType: g })}
+                  onClick={() =>
+                    setTrip((t) => ({
+                      ...t,
+                      groupType: g,
+                      // Sync the count to the chosen group type.
+                      groupSize:
+                        g === "Solo" ? 1 : g === "Couple" ? 2 : t.groupSize < 2 ? 3 : t.groupSize,
+                    }))
+                  }
                   className="rounded-lg border px-3.5 py-2 text-sm transition-all"
                   style={
                     trip.groupType === g
@@ -444,9 +459,33 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
         </div>
       )}
 
+      {/* Step 2: Experiences (10 sliders) in a 2-column grid to keep it short. */}
       {step === 2 && (
-        <div className="wp-scroll max-h-[55vh] space-y-5 overflow-y-auto pr-2">
-          {SLIDER_GROUPS.map((g) => (
+        <div className="wp-scroll max-h-[58vh] overflow-y-auto pr-2">
+          <div className="mb-3 flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full" style={{ background: SLIDER_GROUPS[0].color }} />
+            <h3 className="text-xs uppercase tracking-widest text-slate-400">
+              {SLIDER_GROUPS[0].label}
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
+            {SLIDER_GROUPS[0].sliders.map((s) => (
+              <PrefSlider
+                key={s.key}
+                def={s}
+                color={SLIDER_GROUPS[0].color}
+                value={prefs[s.key]}
+                onChange={(v) => setPrefs({ ...prefs, [s.key]: v })}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Pace & Style, Practical, Accommodation. */}
+      {step === 3 && (
+        <div className="wp-scroll max-h-[58vh] space-y-5 overflow-y-auto pr-2">
+          {SLIDER_GROUPS.slice(1).map((g) => (
             <div key={g.label}>
               <div className="mb-3 flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full" style={{ background: g.color }} />
@@ -466,7 +505,7 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
         </div>
       )}
 
-      {step === 3 && (
+      {step === 4 && (
         <div className="space-y-4">
           <div>
             <label className="mb-1 block text-xs text-slate-400">
@@ -496,7 +535,7 @@ export function Wizard({ initialCountries }: { initialCountries: string[] }) {
         </div>
       )}
 
-      {step === 4 && (
+      {step === 5 && (
         <div className="space-y-3">
           <div className="space-y-2 rounded-xl border border-slate-700 bg-slate-900/50 p-4 text-sm">
             <Row k="Country" v={`${flavor.flag} ${flavor.name}`} />

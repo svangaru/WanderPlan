@@ -346,3 +346,29 @@ export function codeForCountryName(name: string): string {
   if (match) return match[0];
   return name.slice(0, 2).toUpperCase();
 }
+
+/**
+ * Major cities per country, gateway/first listed as the default. These are the
+ * cities we actually have curated experiences in, so the dropdown choices map
+ * straight to what the itinerary can use. Users can still type a custom city.
+ */
+export const COUNTRY_CITIES: Record<string, string[]> = {
+  IT: ["Rome", "Florence", "Venice", "Milan", "Naples", "Bologna", "Siena", "Verona", "Amalfi", "Palermo", "Como"],
+  FR: ["Paris", "Nice", "Lyon", "Marseille", "Bordeaux", "Avignon", "Reims", "Chamonix", "Carcassonne", "Versailles"],
+  ES: ["Madrid", "Barcelona", "Seville", "Granada", "Málaga", "San Sebastián", "Córdoba", "Ronda", "Logroño"],
+  US: ["New York", "San Francisco", "Las Vegas", "New Orleans", "Honolulu", "Washington", "Yellowstone", "Grand Canyon", "Yosemite"],
+  TR: ["Istanbul", "Göreme", "Antalya", "Fethiye", "Pamukkale", "Selçuk", "Gaziantep"],
+  MX: ["Mexico City", "Oaxaca", "Tulum", "Playa del Carmen", "Guanajuato", "San Miguel de Allende", "Puebla", "Valladolid", "Cozumel"],
+  JP: ["Tokyo", "Kyoto", "Osaka", "Hiroshima", "Nara", "Hakone", "Sapporo", "Niseko", "Fujiyoshida"],
+  GR: ["Athens", "Santorini", "Mykonos", "Heraklion", "Chania", "Nafplio", "Delphi", "Zakynthos", "Kalambaka"],
+  TH: ["Bangkok", "Chiang Mai", "Phuket", "Krabi", "Ayutthaya", "Kanchanaburi", "Ko Pha-ngan"],
+  PT: ["Lisbon", "Porto", "Sintra", "Lagos", "Cascais", "Évora", "Nazaré"],
+};
+
+export function majorCities(code: string): string[] {
+  return COUNTRY_CITIES[code?.toUpperCase()] ?? [];
+}
+
+export function defaultCity(code: string): string {
+  return majorCities(code)[0] ?? "";
+}

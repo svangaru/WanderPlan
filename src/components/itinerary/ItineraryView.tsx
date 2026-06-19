@@ -6,6 +6,7 @@ import { formatDate } from "@/lib/dates";
 import type { ItineraryDay } from "@/lib/itinerary/schema";
 import type { EventContext } from "@/lib/types";
 import { DayCard } from "@/components/itinerary/DayCard";
+import { CountryMap } from "@/components/itinerary/CountryMap";
 import { ItalyMap } from "@/components/itinerary/ItalyMap";
 import { MiniGlobe } from "@/components/ui/MiniGlobe";
 import { useToast } from "@/components/ui/Toast";
@@ -46,9 +47,11 @@ export function ItineraryView({
   const [regenDay, setRegenDay] = useState<number | null>(null);
 
   const total = days.reduce((s, d) => s + (d.daily_total_cost_usd || 0), 0);
-  // The SVG route map is Italy-only; other countries use day view until the
-  // Phase C Mapbox view lands.
-  const showMap = headline.countryCode === "IT";
+  // Show map if Mapbox token is available (works for all countries)
+  // Otherwise, show SVG map for Italy only
+  const hasMapboxToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  const showMap = hasMapboxToken || headline.countryCode === "IT";
+  const useMapbox = hasMapboxToken;
 
   const toggleLock = (dayNumber: number) => {
     setLocks((prev) => {
@@ -137,28 +140,34 @@ export function ItineraryView({
       )}
 
       {showMap && (
-        <div
-          className="mb-5 flex w-fit gap-1 rounded-full border border-slate-800 p-1"
-          style={{ background: "rgba(10,15,30,0.8)" }}
-        >
-          {([
-            ["days", "📋 Day view"],
-            ["map", "🗺️ Map view"],
-          ] as const).map(([v, label]) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
+        <div className="mb-5 space-y-3">
+          <div
+            className="flex w-fit gap-1 rounded-full border border-slate-800 p-1"
+            style={{ background: "rgba(10,15,30,0.8)" }}
+          >
+            {([
+              ["days", "📋 Day view"],
+              ["map", "🗺️ Map view"],
+            ] as const).map(([v, label]) => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
               className="rounded-full px-4 py-1.5 text-xs font-medium transition-all"
               style={view === v ? { background: "#00E5C3", color: "#06281f" } : { color: "#94a3b8" }}
             >
               {label}
             </button>
           ))}
+          </div>
         </div>
       )}
 
       {showMap && view === "map" ? (
-        <ItalyMap days={days} cityCoords={cityCoords} />
+        useMapbox ? (
+          <CountryMap days={days} cityCoords={cityCoords} countryName={headline.countryName} />
+        ) : (
+          <ItalyMap days={days} cityCoords={cityCoords} />
+        )
       ) : (
         <div className="space-y-4 pb-10">
           {days.map((d) => (

@@ -12,17 +12,19 @@
  * - Reduced hallucination (Claude can't suggest irrelevant activities)
  */
 
-import { generateLive } from "./claude-engine";
+import { cascadePlan } from "./cascade";
+import { contextToExperiences } from "./experience-converter";
 import type { ExperienceContext, EventContext, GenerationContext, Preferences } from "@/lib/types";
 import type { Itinerary } from "./schema";
 
 export interface MLGenerateResult {
   itinerary: Itinerary;
-  source: "claude";
+  source: "rules" | "embeddings" | "claude";
   usage: { inputTokens: number; outputTokens: number };
   rawPrompt: string;
   rawResponse: string;
   scoredCount: number;
+  cascadeSource?: string;
 }
 
 /**
@@ -78,26 +80,35 @@ function scoreExperience(exp: ExperienceContext, prefs: Preferences): number {
 export async function generateLiveML(
   ctx: GenerationContext,
   experiences: ExperienceContext[],
-  events: EventContext[],
-  options: {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _events: EventContext[],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _options: {
     maxTokens: number;
     onText?: (delta: string) => void;
   },
 ): Promise<MLGenerateResult> {
-  // TODO: Integrate with cascadePlan once type conversions are sorted
-  // For now, call Claude directly with all experiences
-  // The cascade infrastructure is ready for future optimization
-  const result = await generateLive(ctx, experiences, events, {
-    maxTokens: options.maxTokens,
-    onText: options.onText,
-  });
+  const countryCode = ctx.trip.countries[0] ?? "IT";
+
+  // Convert API experiences to DB model
+  const dbExperiences = contextToExperiences(experiences, countryCode);
+
+  // Use ML cascade: tries rules first, only calls Claude if needed
+  const cascadeResult = await cascadePlan(dbExperiences, ctx.trip, ctx.prefs, countryCode);
+
+  // Map cascade source to usage
+  const usage =
+    cascadeResult.source === "claude"
+      ? { inputTokens: 500, outputTokens: 1000 } // rough estimate
+      : { inputTokens: 0, outputTokens: 0 };
 
   return {
-    itinerary: result.itinerary,
-    source: "claude",
-    usage: result.usage,
-    rawPrompt: result.rawPrompt,
-    rawResponse: result.rawResponse,
+    itinerary: cascadeResult.itinerary,
+    source: cascadeResult.source,
+    usage,
+    rawPrompt: "",
+    rawResponse: "",
     scoredCount: experiences.length,
+    cascadeSource: cascadeResult.source,
   };
 }

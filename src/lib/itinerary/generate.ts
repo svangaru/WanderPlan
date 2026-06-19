@@ -75,6 +75,8 @@ export async function generateItinerary(
       rawResponse: mlResult.rawResponse,
     };
   } catch (err) {
-    return mockResult(err instanceof Error ? err.message : "ML generation failed");
+    const errorMsg = err instanceof Error ? err.message : "ML generation failed";
+    console.error(`[generate] Claude failed, falling back to mock: ${errorMsg}`);
+    return mockResult(errorMsg);
   }
 }

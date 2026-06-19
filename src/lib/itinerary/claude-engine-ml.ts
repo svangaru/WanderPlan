@@ -63,6 +63,22 @@ export async function generateLiveML(
     description: exp.description,
   }));
 
+  // Safety check: if we don't have enough experiences, log and fall back to all
+  if (topExperiences.length === 0) {
+    console.warn(`[ML] No scored experiences found, falling back to all experiences`);
+    // Fall back to original experiences
+    return {
+      itinerary: await (await generateLive(ctx, experiences, events, {
+        maxTokens: options.maxTokens,
+        onText: options.onText,
+      })).itinerary,
+      source: "claude",
+      usage: { inputTokens: 0, outputTokens: 0 },
+      rawPrompt: "",
+      rawResponse: "ML fallback: no scored experiences",
+    };
+  }
+
   // Use standard Claude generation but with the ML-filtered experience set
   // This keeps the same itinerary format and flow, just with better-ranked inputs
   const result = await generateLive(ctx, topExperiences, events, {

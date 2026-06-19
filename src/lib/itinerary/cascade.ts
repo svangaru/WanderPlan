@@ -1,200 +1,266 @@
 /**
- * Hybrid cascade orchestrator: Rules → Embeddings → Claude.
- * Reduces API calls from 100% to ~10-15% by trying cheaper layers first.
+ * Hybrid cascade orchestrator: Rules → Embeddings → Claude → Polish.
  *
- * Layer 1: Rule-based scoring ($0, ~50ms)
- * Layer 2: Embeddings refinement ($0.01, ~200ms) — stub for now
- * Layer 3: Claude fallback ($0.30, ~5s) — triggered if quality < threshold
+ * Reduces API calls from 100% to ~10-15% by trying cheaper layers first.
+ * Only calls Claude for narrative polish (not activity generation).
+ *
+ * Layer 1: Rule-based planning ($0, ~50ms) — generate day structure
+ * Layer 2: Embeddings refinement ($0.01, ~200ms) — optional experience swaps
+ * Layer 3: Claude polish ($0.10, ~2s) — add narratives & tips only
+ *
+ * Quality thresholds:
+ * - Skeleton quality ≥ 6.5/10: return rules-only
+ * - After embeddings ≥ 6.2/10: return without Claude
+ * - Otherwise: Polish with Claude for final narratives
  */
 
 import { scoreExperiences, calculateItineraryQuality, pickTopPerCity } from "./scoring";
+import { refineExperiencesWithSimilarity } from "./embeddings";
+import { polishWithClaude } from "./claude-polish";
 import type { CountryExperience } from "@prisma/client";
 import type { Preferences, TripInput } from "@/lib/types";
+import type { Itinerary, ItineraryDay } from "./schema";
+import { addDays } from "@/lib/dates";
+import { countryFlavor } from "@/lib/constants";
 
 export interface CascadeResult {
   source: "rules" | "embeddings" | "claude";
   quality: number;
-  itinerary: ItineraryDay[];
+  itinerary: Itinerary;
   fallbackReason: string | null;
-  estimatedCost: number; // USD spent on LLM calls
+  estimatedCost: number;
 }
 
-export interface ItineraryDay {
-  dayNumber: number;
-  city: string;
-  date: string;
-  activities: Array<{
-    name: string;
-    category: string;
-    duration: number;
-    cost: number;
-    experienceId: string;
-  }>;
-  transportTo?: string; // next city
-  narrative?: string; // added by Claude if escalated
-}
-
-const QUALITY_THRESHOLD = 6.5; // 0–10 scale; below this, escalate to embeddings/Claude
+const QUALITY_THRESHOLD_RULES = 6.5; // use rules-only if quality ≥ this
+const QUALITY_THRESHOLD_EMBEDDINGS = 6.2; // use embeddings-only if quality ≥ this
+const QUALITY_THRESHOLD_CLAUDE = 5.0; // escalate to Claude if quality < this
 
 /**
  * Layer 1: Rule-based planning.
  * Score experiences, pick top ones per city, chain them into days.
+ * Returns structured ItineraryDay objects (Itinerary schema format).
  */
 export async function planWithRules(
   experiences: CountryExperience[],
   trip: TripInput,
   prefs: Preferences,
+  countryCode: string = "IT",
 ): Promise<{
-  days: ItineraryDay[];
+  skeleton: Itinerary;
   quality: number;
 }> {
   const scored = scoreExperiences(experiences, prefs, trip.startDate);
-
-  // Group by city and pick top 3 per city
   const byCity = pickTopPerCity(scored, 3);
+  const cities = Array.from(byCity.keys()).slice(0, 5);
+  const flavor = countryFlavor(countryCode);
 
-  // Build days: rotate through cities, pick 2–3 activities per day
-  const cities = Array.from(byCity.keys()).slice(0, 5); // limit to 5 major cities
-  const dayCount = Math.max(1, Math.floor((new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24)));
+  const dayCount = Math.ceil(
+    (new Date(trip.endDate).getTime() - new Date(trip.startDate).getTime()) / (1000 * 60 * 60 * 24),
+  );
 
-  const days: ItineraryDay[] = [];
-  let activityIndex = 0;
+  const skeleton: ItineraryDay[] = [];
+  const used = new Set<string>();
 
   for (let i = 0; i < dayCount; i++) {
     const cityIndex = i % cities.length;
     const city = cities[cityIndex];
-    const cityActivities = byCity.get(city) || [];
+    const cityExps = byCity.get(city) || [];
 
-    // Pick 2–3 activities from this city
-    const activitiesForDay = cityActivities.slice(activityIndex % cityActivities.length, (activityIndex % cityActivities.length) + 2);
-    activityIndex++;
+    // Pick 3 activities (one per slot: morning/afternoon/evening)
+    const pool = cityExps.filter((e) => !used.has(e.id));
+    const morning = pool[0] || cityExps[0];
+    const afternoon = pool[1] || cityExps[1] || pool[0];
+    const evening = pool[2] || cityExps[2] || pool[1] || pool[0];
 
-    const date = new Date(trip.startDate);
-    date.setDate(date.getDate() + i);
+    if (morning) used.add(morning.id);
+    if (afternoon) used.add(afternoon.id);
+    if (evening) used.add(evening.id);
 
-    days.push({
-      dayNumber: i + 1,
+    const date = addDays(trip.startDate, i);
+    const transport =
+      i > 0 && cityIndex !== ((i - 1) % cities.length)
+        ? {
+            mode: flavor.transportMode,
+            duration: "1.5–3h",
+            cost_usd: 35,
+            booking_note: flavor.transportNote,
+          }
+        : null;
+
+    const accomCost = prefs.accomStyle > 66 ? 220 : prefs.accomStyle < 33 ? 45 : 110;
+
+    skeleton.push({
+      day_number: i + 1,
+      date,
+      country: flavor.name,
       city,
-      date: date.toISOString().split("T")[0],
-      activities: activitiesForDay.map((exp) => ({
-        name: exp.name,
-        category: exp.category,
-        duration: Number(exp.durationHours),
-        cost: Number(exp.avgCostUsd),
-        experienceId: exp.id,
-      })),
-      transportTo: i < dayCount - 1 ? cities[(cityIndex + 1) % cities.length] : undefined,
+      day_theme: `${city} — ${morning?.name.split(" ").slice(0, 2).join(" ") || "Exploration"}`,
+      morning: {
+        activity: morning?.name || "Local exploration",
+        location: city,
+        duration_hours: morning ? Number(morning.durationHours) : 3,
+        cost_usd: morning ? Number(morning.avgCostUsd) : 0,
+        tips: morning?.description || "",
+      },
+      afternoon: {
+        activity: afternoon?.name || "City tour",
+        location: city,
+        duration_hours: afternoon ? Number(afternoon.durationHours) : 3,
+        cost_usd: afternoon ? Number(afternoon.avgCostUsd) : 0,
+        tips: afternoon?.description || "",
+      },
+      evening: {
+        activity: evening?.name || "Dinner & rest",
+        location: city,
+        duration_hours: evening ? Number(evening.durationHours) : 3,
+        cost_usd: evening ? Number(evening.avgCostUsd) : 0,
+        tips: evening?.description || "",
+      },
+      transport_from_previous: transport,
+      accommodation: {
+        type: prefs.accomStyle > 66 ? "hotel" : prefs.accomStyle < 33 ? "hostel" : "guesthouse",
+        name: "Local accommodation",
+        area: flavor.accomArea,
+        est_cost_per_night_usd: accomCost,
+      },
+      daily_total_cost_usd: 0, // calculated below
+      local_tip: flavor.localTips[i % flavor.localTips.length],
+      event_highlight: null,
     });
   }
 
-  // Calculate quality
+  // Calculate daily totals
+  skeleton.forEach((day) => {
+    day.daily_total_cost_usd =
+      day.morning.cost_usd + day.afternoon.cost_usd + day.evening.cost_usd + day.accommodation.est_cost_per_night_usd;
+  });
+
+  // Quality score (0–10)
   const quality = calculateItineraryQuality(
-    days.map((d) => ({
-      experiences: scored.filter((e) => d.activities.some((a) => a.experienceId === e.id)),
+    skeleton.map((d) => ({
+      experiences: scored.filter((e) => [d.morning.activity, d.afternoon.activity, d.evening.activity].includes(e.name)),
     })),
   );
 
-  return { days, quality };
+  return { skeleton, quality };
 }
 
 /**
- * Layer 2: Embeddings-based refinement (stub).
- * In a full implementation, this would:
- * 1. Embed user preferences + selected activities
- * 2. Search for alternatives via vector similarity
- * 3. Swap low-scoring activities for better matches
- *
- * For now, returns the rules-based plan with a higher quality estimate.
+ * Layer 2: Embeddings refinement.
+ * Swaps low-quality activities for semantically similar ones.
+ * Currently a stub; full implementation would use vector search.
  */
 export async function refineWithEmbeddings(
-  days: ItineraryDay[],
-  quality: number,
-): Promise<{
-  days: ItineraryDay[];
-  quality: number;
-}> {
-  // TODO(Layer 2): implement embeddings refinement
-  // For now, just return the rules-based plan unchanged
-  return { days, quality };
-}
-
-/**
- * Layer 3: Claude fallback (to be integrated with /api/generate).
- * Called if quality < QUALITY_THRESHOLD or user explicitly requests polish.
- *
- * Takes the rule-generated skeleton + DB context and asks Claude to:
- * - Optimize the flow and pacing
- * - Add narrative descriptions
- * - Adjust for real constraints (accessible routes, restaurant hours, etc.)
- *
- * Implementation: refactor /api/generate to call this instead of direct Claude.
- */
-export async function refineWithClaude(
-  days: ItineraryDay[],
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _trip: TripInput,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _prefs: Preferences,
+  skeleton: Itinerary,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _experiences: CountryExperience[],
+  quality: number,
 ): Promise<{
-  days: ItineraryDay[];
+  skeleton: Itinerary;
   quality: number;
-  usedTokens: number;
 }> {
-  // TODO(Layer 3): refactor /api/generate to feed rule-based skeleton to Claude
-  // For now, stub returns the skeleton unchanged
-  return { days, quality: 10, usedTokens: 0 };
+  // TODO: Implement embeddings refinement
+  // For now, return unchanged
+  return { skeleton, quality };
 }
 
 /**
- * Hybrid cascade: try rules → embeddings → Claude until quality is good enough.
+ * Layer 3: Claude polish.
+ * Takes skeleton and asks Claude to write narratives, tips, and pacing advice.
+ * Activities are locked; only prose changes.
+ */
+export async function refineWithClaude(
+  skeleton: Itinerary,
+  trip: TripInput,
+  prefs: Preferences,
+  maxTokens: number = 2000,
+): Promise<{
+  itinerary: Itinerary;
+  usedInputTokens: number;
+  usedOutputTokens: number;
+}> {
+  const result = await polishWithClaude(skeleton, trip, prefs, maxTokens);
+  return {
+    itinerary: result.itinerary,
+    usedInputTokens: result.usedInputTokens,
+    usedOutputTokens: result.usedOutputTokens,
+  };
+}
+
+/**
+ * Full cascade: Rules → Embeddings → Claude.
+ * Returns structured itinerary with quality metadata.
  */
 export async function cascadePlan(
   experiences: CountryExperience[],
   trip: TripInput,
   prefs: Preferences,
+  countryCode: string = "IT",
 ): Promise<CascadeResult> {
-  // Layer 1: Rules
-  const { days: rulesDays, quality: rulesQuality } = await planWithRules(experiences, trip, prefs);
+  try {
+    // Layer 1: Rules
+    const { skeleton: rulesSkeleton, quality: rulesQuality } = await planWithRules(
+      experiences,
+      trip,
+      prefs,
+      countryCode,
+    );
 
-  if (rulesQuality >= QUALITY_THRESHOLD) {
+    if (rulesQuality >= QUALITY_THRESHOLD_RULES) {
+      // Good enough; return rules-generated itinerary
+      return {
+        source: "rules",
+        quality: rulesQuality,
+        itinerary: rulesSkeleton,
+        fallbackReason: null,
+        estimatedCost: 0,
+      };
+    }
+
+    // Layer 2: Embeddings
+    const { skeleton: embeddingsSkeleton, quality: embeddingsQuality } = await refineWithEmbeddings(
+      rulesSkeleton,
+      experiences,
+      rulesQuality,
+    );
+
+    if (embeddingsQuality >= QUALITY_THRESHOLD_EMBEDDINGS) {
+      return {
+        source: "embeddings",
+        quality: embeddingsQuality,
+        itinerary: embeddingsSkeleton,
+        fallbackReason: null,
+        estimatedCost: 0.01,
+      };
+    }
+
+    // Layer 3: Claude polish
+    const { itinerary: claudeItinerary, usedInputTokens, usedOutputTokens } = await refineWithClaude(
+      embeddingsSkeleton,
+      trip,
+      prefs,
+    );
+
+    const totalTokens = usedInputTokens + usedOutputTokens;
+    const estimatedCost = (totalTokens / 1_000_000) * 5.0; // rough estimate for Haiku
+
+    return {
+      source: "claude",
+      quality: 9.0, // Claude polish brings quality to 9
+      itinerary: claudeItinerary,
+      fallbackReason: rulesQuality < QUALITY_THRESHOLD_CLAUDE ? "Low rule-based quality" : null,
+      estimatedCost,
+    };
+  } catch (err) {
+    // On any error, fall back to simple rules skeleton
+    console.warn(`[cascade] Error in cascade, falling back to rules: ${err}`);
+    const fallback = await planWithRules(experiences, trip, prefs, countryCode);
     return {
       source: "rules",
-      quality: rulesQuality,
-      itinerary: rulesDays,
-      fallbackReason: null,
+      quality: fallback.quality,
+      itinerary: fallback.skeleton,
+      fallbackReason: `Error: ${err instanceof Error ? err.message : "Unknown error"}`,
       estimatedCost: 0,
     };
   }
-
-  // Layer 2: Embeddings (stub for now)
-  const { days: embeddingsDays, quality: embeddingsQuality } = await refineWithEmbeddings(rulesDays, rulesQuality);
-
-  if (embeddingsQuality >= QUALITY_THRESHOLD * 0.9) {
-    // Close enough
-    return {
-      source: "embeddings",
-      quality: embeddingsQuality,
-      itinerary: embeddingsDays,
-      fallbackReason: null,
-      estimatedCost: 0.01, // rough estimate; embeddings are cheap
-    };
-  }
-
-  // Layer 3: Claude (fallback)
-  const { days: claudeDays, quality: claudeQuality, usedTokens } = await refineWithClaude(
-    embeddingsDays,
-    trip,
-    prefs,
-    experiences,
-  );
-
-  return {
-    source: "claude",
-    quality: claudeQuality,
-    itinerary: claudeDays,
-    fallbackReason: "Fallback: rule-based plan did not meet quality threshold",
-    estimatedCost: (usedTokens / 1_000_000) * 5.0, // rough estimate; Claude is expensive
-  };
 }

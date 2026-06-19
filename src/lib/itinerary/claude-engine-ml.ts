@@ -93,6 +93,7 @@ export async function generateLiveML(
 
   // TODO: Use top 20 in future once Claude performs well with filtered context
   // For now, pass all experiences to Claude (scoring is ready when needed)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const allExperiences = scored.map(({ score, ...exp }) => exp);
 
   // Pass to Claude

@@ -252,11 +252,15 @@ model Itinerary {
   rawPrompt    String   @db.Text
   rawResponse  String   @db.Text
   isActive     Boolean  @default(true)
+  shareToken   String?  @unique @db.VarChar(32)
+  isShared     Boolean  @default(false)
+  sharedAt     DateTime?
 
   trip Trip             @relation(fields: [tripId], references: [id], onDelete: Cascade)
   days ItineraryDay[]
 
   @@index([tripId])
+  @@index([shareToken])
   @@map("itineraries")
 }
 

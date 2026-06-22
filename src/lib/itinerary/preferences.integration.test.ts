@@ -55,6 +55,26 @@ const mockTrip = (overrides?: Partial<TripInput>): TripInput => ({
   ...overrides,
 });
 
+const defaultPrefs = (): Preferences => ({
+  food: 50,
+  nature: 50,
+  culture: 50,
+  adventure: 30,
+  beach: 20,
+  city: 40,
+  music: 30,
+  wellness: 40,
+  nightlife: 20,
+  photography: 40,
+  wildlife: 0,
+  pace: 50,
+  local: 50,
+  minFlights: 0,
+  accomType: 50,
+  accomStyle: 50,
+  minCost: 50,
+});
+
 describe("Preference Integration: Food Preference", () => {
   it("prefers food experiences when food preference is high", async () => {
     const experiences = [
@@ -68,8 +88,8 @@ describe("Preference Integration: Food Preference", () => {
     ];
 
     const trip = mockTrip();
-    const highFoodPrefs = { food: 100, nature: 0, culture: 0, adventure: 0, beach: 0, city: 0, music: 0, wellness: 0, nightlife: 0, photography: 0, accomStyle: 50, minCost: 50 };
-    const lowFoodPrefs = { food: 0, nature: 100, culture: 0, adventure: 0, beach: 0, city: 0, music: 0, wellness: 0, nightlife: 0, photography: 0, accomStyle: 50, minCost: 50 };
+    const highFoodPrefs: Preferences = { ...defaultPrefs(), food: 100, nature: 0 };
+    const lowFoodPrefs: Preferences = { ...defaultPrefs(), food: 0, nature: 100 };
 
     const highFoodResult = await planWithRules(experiences, trip, highFoodPrefs, "IT");
     const lowFoodResult = await planWithRules(experiences, trip, lowFoodPrefs, "IT");
@@ -102,7 +122,7 @@ describe("Preference Integration: Food Preference", () => {
     ];
 
     const trip = mockTrip({ budget: 30 }); // Low budget
-    const budgetPrefs = { food: 50, nature: 50, culture: 50, adventure: 50, beach: 50, city: 50, music: 50, wellness: 50, nightlife: 50, photography: 50, accomStyle: 30, minCost: 75 };
+    const budgetPrefs: Preferences = { ...defaultPrefs(), accomStyle: 30, minCost: 75 };
 
     const result = await planWithRules(experiences, trip, budgetPrefs, "IT");
 
@@ -134,7 +154,7 @@ describe("Preference Integration: Activity Variety", () => {
     ];
 
     const trip = mockTrip();
-    const balancedPrefs = { food: 50, nature: 50, culture: 50, adventure: 30, beach: 20, city: 40, music: 30, wellness: 40, nightlife: 20, photography: 40, accomStyle: 50, minCost: 50 };
+    const balancedPrefs: Preferences = defaultPrefs();
 
     const result = await planWithRules(experiences, trip, balancedPrefs, "IT");
 
@@ -164,8 +184,8 @@ describe("Preference Integration: Quality Impact", () => {
     ];
 
     const trip = mockTrip();
-    const preferPremium = { food: 50, nature: 50, culture: 100, adventure: 30, beach: 20, city: 40, music: 30, wellness: 40, nightlife: 20, photography: 40, accomStyle: 80, minCost: 30 };
-    const preferBudget = { food: 50, nature: 50, culture: 100, adventure: 30, beach: 20, city: 40, music: 30, wellness: 40, nightlife: 20, photography: 40, accomStyle: 20, minCost: 90 };
+    const preferPremium: Preferences = { ...defaultPrefs(), culture: 100, accomStyle: 80, minCost: 30 };
+    const preferBudget: Preferences = { ...defaultPrefs(), culture: 100, accomStyle: 20, minCost: 90 };
 
     const premiumResult = await planWithRules(experiences, trip, preferPremium, "IT");
     const budgetResult = await planWithRules(experiences, trip, preferBudget, "IT");
@@ -183,7 +203,7 @@ describe("Preference Integration: Accommodation Style", () => {
   it("luxury preference selects hotel accommodation", async () => {
     const experiences = [mockExp(), mockExp({ id: "exp-2", name: "exp2" })];
     const trip = mockTrip();
-    const luxuryPrefs = { food: 50, nature: 50, culture: 50, adventure: 30, beach: 20, city: 40, music: 30, wellness: 40, nightlife: 20, photography: 40, accomStyle: 90, minCost: 20 };
+    const luxuryPrefs: Preferences = { ...defaultPrefs(), accomStyle: 90, minCost: 20 };
 
     const result = await planWithRules(experiences, trip, luxuryPrefs, "IT");
 
@@ -194,7 +214,7 @@ describe("Preference Integration: Accommodation Style", () => {
   it("budget preference selects hostel accommodation", async () => {
     const experiences = [mockExp(), mockExp({ id: "exp-2", name: "exp2" })];
     const trip = mockTrip();
-    const budgetPrefs = { food: 50, nature: 50, culture: 50, adventure: 30, beach: 20, city: 40, music: 30, wellness: 40, nightlife: 20, photography: 40, accomStyle: 10, minCost: 90 };
+    const budgetPrefs: Preferences = { ...defaultPrefs(), accomStyle: 10, minCost: 90 };
 
     const result = await planWithRules(experiences, trip, budgetPrefs, "IT");
 
@@ -205,7 +225,7 @@ describe("Preference Integration: Accommodation Style", () => {
   it("mid-range preference selects guesthouse accommodation", async () => {
     const experiences = [mockExp(), mockExp({ id: "exp-2", name: "exp2" })];
     const trip = mockTrip();
-    const midPrefs = { food: 50, nature: 50, culture: 50, adventure: 30, beach: 20, city: 40, music: 30, wellness: 40, nightlife: 20, photography: 40, accomStyle: 50, minCost: 50 };
+    const midPrefs: Preferences = defaultPrefs();
 
     const result = await planWithRules(experiences, trip, midPrefs, "IT");
 
